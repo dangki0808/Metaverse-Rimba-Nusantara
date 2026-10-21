@@ -1,0 +1,1280 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Rimba Nusantara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap">
+<style>
+/* Layout: full-bleed 3D rainforest world; HUD floats in the corners; dialogs rise in the centre as carved-teak panels edged with a tumpal band */
+:root{
+  --panel: rgba(13,31,23,.84);
+  --panel-solid:#11251b;
+  --panel-2:#183326;
+  --line: rgba(233,185,73,.32);
+  --ink:#eef3e6;
+  --ink-dim:#a9bba3;
+  --gold:#e9b949;
+  --gold-deep:#a8771f;
+  --sky:#5cc3e6;
+  --ok:#5fd08a;
+  --bad:#ef6a55;
+  --f-display:'Cinzel', 'Trajan Pro', Georgia, 'Times New Roman', serif;
+  --f-body:'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:#0b1a12;color:var(--ink);font-family:var(--f-body);font-size:15px;-webkit-tap-highlight-color:transparent}
+#world{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+[hidden]{display:none!important}
+button{font-family:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+#hud[hidden]{display:none!important}
+.card{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px}
+#status{box-sizing:border-box;position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));padding:12px 14px;width:min(320px,calc(100vw - 168px));pointer-events:auto}
+#status .who{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#status .pts{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+#status .pts b{font-family:var(--f-display);font-size:26px;color:var(--gold);line-height:1}
+#status .pts span{font-size:12px;color:var(--ink-dim)}
+.gems{display:flex;gap:9px;margin:10px 0 8px 3px}
+.gem{width:13px;height:13px;transform:rotate(45deg);border-radius:3px;border:1.5px dashed rgba(255,255,255,.28);box-sizing:border-box;flex:none}
+.gem.on{border:none;background:linear-gradient(135deg,#fff 0%,var(--c) 35%,color-mix(in srgb,var(--c) 55%,#000) 100%);box-shadow:0 0 10px var(--c)}
+#mission{display:flex;gap:10px;align-items:center;font-size:12.5px;line-height:1.35;color:var(--ink);border-top:1px solid rgba(233,185,73,.18);padding-top:8px}
+#compass{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:rgba(0,0,0,.25)}
+#compass svg{transition:transform .15s linear}
+#tools{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:250px;pointer-events:auto}
+.tool{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
+.tool:hover{border-color:var(--gold);background:rgba(36,62,46,.92)}
+.tool svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tool.off svg{opacity:.4}
+.tool .tip{position:absolute;top:46px;right:0;white-space:nowrap;font-size:11px;background:#000c;padding:3px 7px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .15s}
+.tool:hover .tip{opacity:1}
+#miniWrap{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));padding:6px;pointer-events:auto;cursor:pointer}
+#mini{width:150px;height:150px;display:block;border-radius:8px}
+#miniWrap .cap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);text-align:center;margin-top:4px}
+#cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+#prompt{position:absolute;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:10px 16px;font-size:14px;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 32px);pointer-events:auto;cursor:pointer}
+#prompt kbd{font-family:var(--f-body);font-weight:800;background:var(--gold);color:#2a1d05;border-radius:6px;padding:2px 8px;font-size:12px}
+#banner{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity .8s;pointer-events:none;width:min(90vw,700px)}
+#banner.show{opacity:1}
+#banner .eyebrow{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+#banner h2{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,5vw,48px);margin:.15em 0;text-shadow:0 2px 18px rgba(0,0,0,.6);text-wrap:balance}
+#banner p{margin:0;color:#fff;text-shadow:0 1px 8px #000;font-size:15px}
+#toasts{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;width:min(420px,calc(100vw - 32px))}
+.toast{padding:10px 14px;font-size:13.5px;line-height:1.4;animation:tin .35s ease both;display:flex;gap:10px;align-items:center;width:100%;box-sizing:border-box}
+.toast b{color:var(--gold)}
+.toast.out{animation:tout .4s ease both}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(-10px)}}
+#joy{position:absolute;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.18);display:none}
+#joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(233,185,73,.75);box-shadow:0 2px 10px #0006}
+#actBtn{position:absolute;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(190px + env(safe-area-inset-bottom,0px));width:68px;height:68px;border-radius:50%;border:none;background:var(--gold);color:#2a1d05;font-weight:800;font-size:13px;display:none;pointer-events:auto;box-shadow:0 4px 14px #0008}
+body.touch #joy{display:block}
+body.touch #cross{display:none}
+body.touch #prompt kbd{display:none}
+
+/* ---------- Start screen ---------- */
+#start{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:flex-start;background:linear-gradient(90deg,rgba(6,16,11,.92) 0%,rgba(6,16,11,.72) 38%,rgba(6,16,11,0) 70%);overflow:auto}
+#start .inner{width:min(520px,100%);box-sizing:border-box;padding-block:calc(32px + env(safe-area-inset-top,0px)) calc(32px + env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px;margin-block:auto}
+#start .kicker{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+#start h1{font-family:var(--f-display);font-weight:800;font-size:clamp(38px,7vw,64px);line-height:.98;margin:0;text-wrap:balance;text-shadow:0 3px 24px rgba(0,0,0,.5)}
+#start h1 span{display:block;font-size:.42em;letter-spacing:.06em;color:var(--ink-dim);font-weight:600;margin-top:10px;font-family:var(--f-body)}
+#start p{margin:0;line-height:1.6;color:#d8e2d2;max-width:60ch}
+.tumpal{height:9px;background:conic-gradient(from 135deg at 50% 100%,var(--gold) 0 90deg,transparent 0) 0 0/14px 9px repeat-x;opacity:.85}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+.fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:10px}
+.field input{min-width:0;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink)}
+.btn{font-weight:700;font-size:15px;padding:12px 18px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:linear-gradient(180deg,#f2c75c,#d29a2c);color:#2a1d05;border-color:#f6d27a}
+.btn.primary:disabled{opacity:.55;cursor:wait}
+.btn.small{font-size:13px;padding:8px 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.loader{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.loader i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:12.5px;color:var(--ink-dim)}
+.keys b{color:var(--ink);font-weight:700}
+.credit{font-size:11.5px;color:var(--ink-dim);line-height:1.5}
+
+/* ---------- Dialogs ---------- */
+#overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(4,10,7,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.sheet{position:relative;width:min(820px,100%);max-height:100%;overflow:auto;background:linear-gradient(180deg,var(--panel-2),var(--panel-solid) 40%);border:1px solid var(--line);border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:sin .3s ease both;box-sizing:border-box}
+.sheet::before{content:"";display:block;height:9px;background:conic-gradient(from 135deg at 50% 100%,var(--c,var(--gold)) 0 90deg,transparent 0) 0 0/14px 9px repeat-x;opacity:.9}
+@keyframes sin{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.sheet .body{padding:20px 22px 22px}
+.x{position:absolute;top:16px;right:12px;width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.3);cursor:pointer;font-size:18px;line-height:1;z-index:2}
+.eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--c,var(--gold));font-weight:700}
+.sheet h3{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,3.6vw,30px);margin:.2em 0 .25em;text-wrap:balance;padding-right:30px}
+.latin{font-style:italic;color:var(--ink-dim);margin:0 0 12px}
+.fauna{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.fauna img{width:100%;border-radius:10px;display:block;border:1px solid var(--line)}
+.fauna p.fact{line-height:1.65;margin:0 0 14px;color:#e2eadc}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{font-size:11.5px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim)}
+.chip.gold{color:#2a1d05;background:var(--gold);border-color:var(--gold);font-weight:700}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+@media (max-width:640px){.fauna{grid-template-columns:minmax(0,1fr)}}
+
+/* quiz */
+.qhead{padding-right:40px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.dots{display:flex;gap:6px}
+.dots i{width:22px;height:5px;border-radius:3px;background:rgba(255,255,255,.15)}
+.dots i.ok{background:var(--ok)}.dots i.no{background:var(--bad)}.dots i.cur{background:var(--gold)}
+.qimg{width:100%;max-height:30vh;aspect-ratio:16/6.2;object-fit:cover;object-position:50% 0%;border-radius:10px;display:block;border:1px solid var(--line);margin-bottom:14px}
+.qtext{font-size:18px;font-weight:700;line-height:1.45;margin:0 0 14px;text-wrap:pretty}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opt{display:flex;gap:10px;align-items:center;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);cursor:pointer;font-size:14.5px;line-height:1.35}
+.opt:hover:not(:disabled){border-color:var(--gold);background:rgba(233,185,73,.08)}
+.opt span.k{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:12px;font-weight:800;background:rgba(255,255,255,.08)}
+.opt.ok{border-color:var(--ok);background:rgba(95,208,138,.14)}
+.opt.no{border-color:var(--bad);background:rgba(239,106,85,.14)}
+.opt:disabled{cursor:default}
+.why{margin-top:14px;padding:12px 14px;border-radius:10px;background:rgba(0,0,0,.25);line-height:1.55;font-size:14px;border-left:3px solid var(--gold)}
+.why b.ok{color:var(--ok)}.why b.no{color:var(--bad)}
+.result{text-align:center;padding:10px 0}
+.biggem{width:64px;height:64px;margin:16px auto 22px;transform:rotate(45deg);border-radius:10px;background:linear-gradient(135deg,#fff 0%,var(--c) 35%,color-mix(in srgb,var(--c) 50%,#000) 100%);box-shadow:0 0 40px var(--c);animation:pulse 1.6s ease-in-out infinite}
+.biggem.dim{background:rgba(255,255,255,.08);box-shadow:none;border:2px dashed rgba(255,255,255,.3);animation:none}
+@keyframes pulse{50%{box-shadow:0 0 70px var(--c)}}
+.result .score{font-family:var(--f-display);font-size:40px;font-weight:800;color:var(--gold)}
+
+/* album */
+.album h4{font-family:var(--f-display);font-size:16px;margin:18px 0 8px;color:var(--c)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.cardf{border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.25);overflow:hidden;cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column}
+.cardf img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:50% 10%;display:block}
+.cardf .ph{aspect-ratio:16/10;display:grid;place-items:center;font-family:var(--f-display);font-size:28px;color:rgba(255,255,255,.25);background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 8px,transparent 8px 16px)}
+.cardf .t{padding:7px 9px 9px;font-size:12px;line-height:1.3}
+.cardf .t b{display:block;font-size:12.5px}
+.cardf .t span{color:var(--ink-dim);font-size:11px}
+.cardf.locked{cursor:default}
+.prog{display:flex;align-items:center;gap:10px;margin:6px 0 4px}
+.prog .bar{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--gold)}
+
+/* achievements */
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}
+.ach div{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.2)}
+.ach div.on{border-color:var(--gold);background:rgba(233,185,73,.08)}
+.ach .medal{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.07);font-family:var(--f-display);font-weight:800;color:var(--ink-dim)}
+.ach .on .medal{background:radial-gradient(circle at 35% 30%,#ffe7a1,var(--gold) 55%,var(--gold-deep));color:#3a2706}
+.ach b{display:block;font-size:13.5px}.ach span{font-size:12px;color:var(--ink-dim);line-height:1.35}
+
+/* map */
+#bigmap{width:100%;max-width:560px;aspect-ratio:1;display:block;margin:6px auto 0;border-radius:12px;cursor:crosshair;touch-action:none}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:var(--ink-dim);justify-content:center;margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* chat */
+#chat{position:fixed;z-index:25;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 24px));height:min(520px,calc(100% - 100px));display:flex;flex-direction:column;overflow:hidden}
+#chat header{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+#chat header .av{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffcf57,#e3651d 60%,#7a1d0c);flex:none;display:grid;place-items:center;font-weight:800;color:#2a1005}
+#chat header b{display:block}
+#chat header span{font-size:12px;color:var(--ink-dim)}
+#chat header button{margin-left:auto}
+#log{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;line-height:1.5;font-size:13.5px}
+.msg.bot{background:rgba(255,255,255,.07);border-top-left-radius:4px}
+.msg.me{background:rgba(233,185,73,.2);align-self:flex-end;border-top-right-radius:4px}
+.msg .act{margin-top:8px}
+#quick{display:flex;gap:6px;overflow-x:auto;padding:0 14px 8px;scrollbar-width:none}
+#quick button{flex:none;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
+#chatForm{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+#chatForm input{flex:1;min-width:0;font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--ink)}
+
+/* certificate */
+.cert{position:relative;margin:4px;padding:28px 22px;border:3px double var(--gold);border-radius:8px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(233,185,73,.14),transparent 60%)}
+.cert .eyebrow{letter-spacing:.34em}
+.cert h3{padding:0;margin:.3em 0 .1em;font-size:clamp(24px,4vw,34px)}
+.cert .name{font-family:var(--f-display);font-size:clamp(26px,5vw,40px);color:var(--gold);margin:6px 0 4px;word-break:break-word}
+.cert .rank{display:inline-block;margin:8px 0 16px;padding:6px 14px;border-radius:999px;background:var(--gold);color:#2a1d05;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 16px}
+.stats div{padding:10px 6px;border-radius:10px;background:rgba(0,0,0,.25)}
+.stats b{display:block;font-family:var(--f-display);font-size:24px;color:var(--ink)}
+.stats span{font-size:11px;color:var(--ink-dim);letter-spacing:.1em;text-transform:uppercase}
+.confirm{margin-top:14px;padding:12px;border-radius:10px;border:1px solid var(--bad);background:rgba(239,106,85,.08)}
+.help dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:10px 0 0;font-size:14px}
+.help dt{font-weight:800;color:var(--gold)}
+.help dd{margin:0;color:#dfe8d9}
+.help ol{line-height:1.7;padding-left:20px;margin:8px 0 0}
+/* papan skor */
+.lbhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:4px 0 12px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--gold);color:#2a1d05;border-color:var(--gold);font-weight:700}
+.lb{display:flex;flex-direction:column;gap:6px}
+.lbrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08)}
+.lbrow.me{border-color:var(--gold);background:rgba(233,185,73,.1)}
+.lbrow .rk{font-family:var(--f-display);font-weight:800;font-size:18px;text-align:center;color:var(--ink-dim)}
+.lbrow .rk.m1{color:#f2c75c}.lbrow .rk.m2{color:#d6dde3}.lbrow .rk.m3{color:#d8925a}
+.lbrow .nm{min-width:0}
+.lbrow .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
+.lbrow .nm span{display:block;font-size:11.5px;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbrow .gems{margin:6px 0 0 3px;gap:7px}.lbrow .gem{width:9px;height:9px}
+.lbrow .sc{text-align:right}
+.lbrow .sc b{font-family:var(--f-display);font-size:20px;color:var(--gold);display:block;line-height:1.1}
+.lbrow .sc span{font-size:11px;color:var(--ink-dim)}
+.lbrow .del{margin-top:4px;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid rgba(239,106,85,.5);background:none;cursor:pointer;color:#f2a093}
+.crownchip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;padding:1px 6px;border-radius:999px;background:var(--gold);color:#2a1d05;margin-left:6px;vertical-align:2px}
+.lbnote{padding:12px 14px;border-radius:10px;background:rgba(0,0,0,.25);border-left:3px solid var(--sky);line-height:1.55;font-size:13.5px;margin-bottom:12px}
+.lbempty{text-align:center;padding:26px 10px;color:var(--ink-dim);line-height:1.6}
+#rankLine{font-size:12px;color:var(--ink-dim);margin-top:2px;cursor:pointer}
+#rankLine b{color:var(--ink)}
+#err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:50;background:#0b1a12}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:640px){
+  #start{background:linear-gradient(180deg,rgba(6,16,11,.78),rgba(6,16,11,.9))}
+  #start p{font-size:14px}
+  #miniWrap{display:none}
+  #status{padding:10px 12px}
+  #status .pts b{font-size:22px}
+  #tools{max-width:140px}
+  .tool{width:36px;height:36px}
+}
+</style>
+
+<canvas id="world" tabindex="0" aria-label="Dunia 3D Rimba Nusantara"></canvas>
+
+<div id="hud" hidden>
+  <div id="status" class="card">
+    <div class="who" id="who">Penjelajah</div>
+    <div class="pts"><b id="pts" class="num">0</b><span>poin</span></div>
+    <div id="rankLine" hidden></div>
+    <div class="gems" id="gems" aria-label="Permata terkumpul"></div>
+    <div id="mission"><div id="compass" title="Kompas misi"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1 L13 14 L8 11 L3 14 Z" fill="#e9b949"/></svg></div><div id="missionText">Jelajahi bilik.</div></div>
+  </div>
+  <div id="tools">
+    <button class="tool" id="tMap" aria-label="Denah"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span class="tip">Denah (M)</span></button>
+    <button class="tool" id="tAlbum" aria-label="Paspor Fauna"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18M12 8h4M12 12h4"/></svg><span class="tip">Paspor Fauna (P)</span></button>
+    <button class="tool" id="tScore" aria-label="Papan Skor Kelas"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21v-6h4v6M10 21V9h4v12M15 21v-9h4v9"/><path d="m12 3 1 2 2 .3-1.5 1.4.4 2.1L12 7.8 10.1 8.8l.4-2.1L9 5.3l2-.3z"/></svg><span class="tip">Papan Skor (K)</span></button>
+    <button class="tool" id="tAch" aria-label="Capaian"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6"/></svg><span class="tip">Capaian</span></button>
+    <button class="tool" id="tChat" aria-label="Kak Rangkong"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg><span class="tip">Kak Rangkong (T)</span></button>
+    <button class="tool" id="tTime" aria-label="Waktu"><svg viewBox="0 0 24 24" id="timeIco"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></svg><span class="tip" id="timeTip">Waktu: Siang (N)</span></button>
+    <button class="tool" id="tSound" aria-label="Suara alam"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><span class="tip">Suara alam</span></button>
+    <button class="tool" id="tVoice" aria-label="Narasi"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg><span class="tip">Narasi suara</span></button>
+    <button class="tool" id="tHelp" aria-label="Bantuan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span class="tip">Bantuan (H)</span></button>
+  </div>
+  <div id="miniWrap" class="card" title="Buka denah"><canvas id="mini" width="300" height="300"></canvas><div class="cap">Denah · klik untuk teleport</div></div>
+  <div id="cross"></div>
+  <div id="prompt" class="card" hidden></div>
+  <div id="banner"><div class="eyebrow" id="bEy"></div><h2 id="bTitle"></h2><p id="bSub"></p></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="joy"><i></i></div>
+  <button id="actBtn">Aksi</button>
+</div>
+
+<div id="start">
+  <div class="inner">
+    <div class="kicker">Metaverse Spasial · Media Pembelajaran</div>
+    <h1>Rimba Nusantara<span>Petualangan Fauna Identitas Provinsi di Indonesia</span></h1>
+    <div class="tumpal"></div>
+    <p>Masuki hutan tropis berdanau. Tujuh bilik bergaya rumah adat menyimpan potongan gambar fauna dari film. Kenali setiap satwa, jawab kuis di altar tiap bilik untuk meraih <b>Permata</b>, lalu kumpulkan tujuh permata untuk membuka <b>Harta Karun</b> di Pulau Candi.</p>
+    <div id="resume" hidden></div>
+    <div class="fields"><div class="field"><label for="nameIn">Nama penjelajah</label><input id="nameIn" maxlength="28" placeholder="Tulis namamu" autocomplete="off"></div><div class="field"><label for="kelasIn">Kelas</label><input id="kelasIn" maxlength="16" placeholder="mis. TI-3A" autocomplete="off"></div></div>
+    <div id="lbStart" class="credit" hidden></div>
+    <div class="loader" aria-hidden="true"><i id="loadBar"></i></div>
+    <div class="row"><button class="btn primary" id="go" disabled>Memuat dunia…</button><button class="btn" id="reset" hidden>Mulai dari awal</button></div>
+    <div class="keys"><div><b>W A S D</b> / panah · berjalan</div><div><b>Seret mouse</b> · melihat</div><div><b>E</b> / klik objek · berinteraksi</div><div><b>Shift</b> · berlari</div><div><b>M</b> denah · <b>P</b> paspor</div><div><b>Ponsel</b> · joystick kiri</div></div>
+    <div class="credit">Materi dan potongan gambar: video “Fauna Nusantara, Identitas Provinsi di Indonesia beserta Gambarnya” (kanal Informan 007).</div>
+  </div>
+</div>
+
+<div id="overlay" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<div id="chat" class="card" hidden>
+  <header><div class="av">KR</div><div><b>Kak Rangkong</b><span>Pemandu rimba · tanya apa saja</span></div><button class="btn small" id="chatClose" aria-label="Tutup">Tutup</button></header>
+  <div id="log"></div>
+  <div id="quick"></div>
+  <form id="chatForm"><input id="chatIn" placeholder="Contoh: fauna Jawa Barat?" autocomplete="off"><button class="btn small primary" type="submit">Kirim</button></form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+if(!window.THREE){document.body.insertAdjacentHTML('beforeend','<div id="err"><div><h2>Mesin 3D gagal dimuat</h2><p>Periksa koneksi internet lalu muat ulang halaman.</p></div></div>');return;}
+const $=id=>document.getElementById(id);
+
+/* =====================================================================
+   1. MATERI (dari film)
+   ===================================================================== */
+const ROOMS=[
+ {id:'nasional',name:'Bilik Satwa Nasional',short:'Nasional',style:'rotunda',arch:'Rotunda Garuda',color:'#e9b949',dir:'barat daya',
+  intro:'Indonesia punya tiga fauna identitas nasional: Komodo sebagai Satwa Nasional, Siluk Merah sebagai Satwa Pesona, dan Elang Jawa sebagai Satwa Langka.',
+  fauna:[
+   {id:'komodo',prov:'Satwa Nasional',name:'Komodo',latin:'Varanus komodoensis',fact:'Biawak terbesar di dunia; panjangnya bisa lebih dari 3 meter. Hidup alami hanya di Pulau Komodo, Rinca, Flores, dan pulau sekitarnya di Nusa Tenggara Timur. Ditetapkan sebagai Satwa Nasional.'},
+   {id:'siluk-merah',prov:'Satwa Pesona',name:'Siluk Merah',latin:'Scleropages formosus (arwana super red)',fact:'Ikan purba bersisik merah menyala dari perairan Danau Sentarum dan Sungai Kapuas, Kalimantan Barat. Ditetapkan sebagai Satwa Pesona karena keindahannya.'},
+   {id:'elang-jawa',prov:'Satwa Langka',name:'Elang Jawa',latin:'Nisaetus bartelsi',fact:'Elang endemik Pulau Jawa dengan jambul tegak di kepala. Sosoknya dianggap mirip Garuda. Ditetapkan sebagai Satwa Langka karena populasinya kecil.'}
+  ],
+  quiz:[
+   {q:'Satwa yang ditetapkan sebagai Satwa Nasional Indonesia adalah…',o:['Komodo','Elang Jawa','Harimau Sumatra','Badak Jawa'],why:'Komodo adalah Satwa Nasional; Elang Jawa adalah Satwa Langka.'},
+   {img:'elang-jawa',q:'Satwa pada gambar ditetapkan sebagai…',o:['Satwa Langka','Satwa Nasional','Satwa Pesona','Fauna identitas Jawa Tengah'],why:'Elang Jawa adalah Satwa Langka, salah satu dari tiga fauna identitas nasional.'},
+   {img:'siluk-merah',q:'Ikan merah ini adalah Siluk Merah. Ia ditetapkan sebagai…',o:['Satwa Pesona','Satwa Langka','Satwa Nasional','Satwa Laut Dalam'],why:'Siluk Merah (arwana super red) ditetapkan sebagai Satwa Pesona.'},
+   {q:'Berapa fauna identitas yang dimiliki Indonesia di tingkat nasional?',o:['Tiga','Satu','Lima','Tujuh'],why:'Tiga: Komodo (Satwa Nasional), Siluk Merah (Satwa Pesona), Elang Jawa (Satwa Langka).'}
+  ]},
+ {id:'sumatra',name:'Bilik Sumatra',short:'Sumatra',style:'gonjong',arch:'Rumah Gadang',color:'#e0484c',dir:'barat',
+  intro:'Bilik ini beratap gonjong seperti Rumah Gadang. Ada sepuluh fauna identitas provinsi di Sumatra dan kepulauannya, dari Aceh sampai Lampung.',
+  fauna:[
+   {id:'aceh',prov:'Aceh',name:'Ceumpala Kuneng',latin:'Copsychus pyrropygus',fact:'Burung kicau berekor jingga kemerahan yang hidup di hutan dataran rendah. Kicaunya merdu sehingga digemari, padahal kini makin jarang di alam.'},
+   {id:'sumut',prov:'Sumatera Utara',name:'Beo Nias',latin:'Gracula robusta',fact:'Beo berukuran besar dari Pulau Nias dan pulau sekitarnya. Pandai menirukan suara manusia, tetapi kini sangat terancam karena perburuan untuk dipelihara.'},
+   {id:'sumbar',prov:'Sumatera Barat',name:'Kuau Raja',latin:'Argusianus argus',fact:'Kerabat merak dengan bulu sayap berhias bulatan seperti mata. Jantan membentangkan bulunya seperti kipas raksasa untuk memikat betina.'},
+   {id:'riau',prov:'Riau',name:'Serindit',latin:'Loriculus galgulus',fact:'Burung paruh bengkok mungil berbulu hijau yang suka tidur bergelantung terbalik. Bagi masyarakat Melayu Riau, serindit melambangkan kearifan.'},
+   {id:'kepri',prov:'Kepulauan Riau',name:'Ikan Kakap',latin:'Lutjanus sp.',fact:'Ikan laut bernilai ekonomi tinggi dan tangkapan andalan nelayan di perairan Kepulauan Riau, provinsi yang sebagian besar wilayahnya lautan.'},
+   {id:'jambi',prov:'Jambi',name:'Harimau Sumatra',latin:'Panthera tigris sumatrae',fact:'Satu-satunya subspesies harimau yang masih tersisa di Indonesia. Salah satu habitat pentingnya adalah Taman Nasional Kerinci Seblat.'},
+   {id:'sumsel',prov:'Sumatera Selatan',name:'Ikan Belida',latin:'Chitala lopis',fact:'Ikan sungai bertubuh pipih seperti pisau dengan bintik di sisi tubuh. Dagingnya dikenal sebagai bahan asli pempek Palembang.'},
+   {id:'babel',prov:'Bangka Belitung',name:'Mentilin',latin:'Cephalopachus bancanus',fact:'Primata mungil sejenis tarsius dengan mata sangat besar. Aktif pada malam hari dan memakan serangga.'},
+   {id:'bengkulu',prov:'Bengkulu',name:'Beruang Madu',latin:'Helarctos malayanus',fact:'Beruang terkecil di dunia dengan corak kuning keemasan di dada. Lidahnya panjang untuk menjilat madu dan rayap.'},
+   {id:'lampung',prov:'Lampung',name:'Gajah Sumatra',latin:'Elephas maximus sumatranus',fact:'Gajah Asia khas Sumatra. Taman Nasional Way Kambas di Lampung terkenal sebagai pusat konservasi gajah.'}
+  ],
+  quiz:[
+   {q:'Fauna identitas Provinsi Jambi adalah…',o:['Harimau Sumatra','Gajah Sumatra','Beruang Madu','Kuau Raja'],why:'Jambi memilih Harimau Sumatra; Gajah Sumatra milik Lampung.'},
+   {img:'sumsel',q:'Ikan pipih bertitik ini adalah fauna identitas provinsi…',o:['Sumatera Selatan','Kepulauan Riau','Gorontalo','Riau'],why:'Ikan Belida adalah fauna identitas Sumatera Selatan.'},
+   {q:'Sumatera Barat memilih fauna identitas…',o:['Kuau Raja','Serindit','Beo Nias','Ceumpala Kuneng'],why:'Kuau Raja, burung berbulu sayap seperti kipas bermata.'},
+   {q:'Mentilin, primata mungil bermata besar, adalah fauna identitas…',o:['Bangka Belitung','Bengkulu','Lampung','Riau'],why:'Mentilin adalah fauna identitas Bangka Belitung.'},
+   {img:'riau',q:'Burung hijau mungil pada gambar adalah identitas Riau. Namanya…',o:['Serindit','Kepodang Emas','Nuri Raja Ambon','Beo Nias'],why:'Serindit adalah fauna identitas Riau.'}
+  ]},
+ {id:'jawa',name:'Bilik Jawa',short:'Jawa',style:'joglo',arch:'Joglo',color:'#3fbf7f',dir:'barat laut',
+  intro:'Bilik beratap Joglo ini memajang enam fauna identitas dari Banten sampai Jawa Timur.',
+  fauna:[
+   {id:'banten',prov:'Banten',name:'Badak Jawa',latin:'Rhinoceros sondaicus',fact:'Badak bercula satu yang sangat langka. Populasi terakhirnya hanya ada di Taman Nasional Ujung Kulon, Banten.'},
+   {id:'dki',prov:'DKI Jakarta',name:'Elang Bondol',latin:'Haliastur indus',fact:'Elang berkepala putih dengan tubuh cokelat kemerahan. Sering terbang di pesisir dan Kepulauan Seribu.'},
+   {id:'jabar',prov:'Jawa Barat',name:'Macan Tutul Jawa',latin:'Panthera pardus melas',fact:'Kucing besar terakhir di Pulau Jawa. Ada yang bertutul dan ada yang berbulu hitam, yang dikenal sebagai macan kumbang.'},
+   {id:'jateng',prov:'Jawa Tengah',name:'Kepodang Emas',latin:'Oriolus chinensis',fact:'Burung berbulu kuning keemasan dengan garis hitam melintang di mata. Terkenal dengan kicau yang merdu.'},
+   {id:'diy',prov:'DI Yogyakarta',name:'Perkutut',latin:'Geopelia striata',fact:'Burung sejenis merpati kecil bersuara lembut “kuk-kuruk”. Dalam budaya Jawa, perkutut lekat dengan ketenangan dan kemakmuran.'},
+   {id:'jatim',prov:'Jawa Timur',name:'Ayam Bekisar',latin:'Gallus varius × Gallus gallus',fact:'Ayam hias hasil persilangan ayam hutan hijau jantan dengan ayam kampung betina. Terkenal dari Pulau Kangean, Madura; bulunya berkilau dan kokoknya khas.'}
+  ],
+  quiz:[
+   {q:'Populasi terakhir Badak Jawa hanya ada di…',o:['Taman Nasional Ujung Kulon','Taman Nasional Way Kambas','Taman Nasional Komodo','Taman Nasional Lorentz'],why:'Badak Jawa, fauna identitas Banten, hidup di Ujung Kulon.'},
+   {q:'Fauna identitas DKI Jakarta adalah…',o:['Elang Bondol','Elang Jawa','Jalak Bali','Perkutut'],why:'Elang Bondol; sedangkan Elang Jawa adalah Satwa Langka nasional.'},
+   {img:'jabar',q:'Kucing besar pada gambar adalah fauna identitas provinsi…',o:['Jawa Barat','Jambi','Banten','Jawa Timur'],why:'Macan Tutul Jawa adalah identitas Jawa Barat.'},
+   {q:'Ayam Bekisar dari Jawa Timur adalah hasil persilangan…',o:['Ayam hutan hijau jantan dan ayam kampung betina','Ayam kampung dan burung kuau','Ayam pelung dan ayam cemani','Ayam hutan merah dan kalkun'],why:'Bekisar lahir dari ayam hutan hijau jantan dengan ayam kampung betina.'},
+   {img:'jateng',q:'Burung kuning pada gambar adalah identitas Jawa Tengah. Namanya…',o:['Kepodang Emas','Serindit','Jalak Bali','Perkutut'],why:'Kepodang Emas, si burung kuning bertopeng hitam.'}
+  ]},
+ {id:'balint',name:'Bilik Bali & Nusa Tenggara',short:'Bali–NT',style:'meru',arch:'Meru Bali',color:'#f08a3c',dir:'utara',
+  intro:'Bilik beratap Meru bersusun tiga ini menampilkan Jalak Bali, Rusa Timor, dan Biawak Komodo.',
+  fauna:[
+   {id:'bali',prov:'Bali',name:'Jalak Bali',latin:'Leucopsar rothschildi',fact:'Burung putih bersih dengan kulit biru di sekitar mata serta ujung sayap dan ekor hitam. Endemik Bali; habitat aslinya di Taman Nasional Bali Barat.'},
+   {id:'ntb',prov:'Nusa Tenggara Barat',name:'Rusa Timor',latin:'Rusa timorensis',fact:'Rusa yang hidup di padang savana dan hutan Nusa Tenggara. Hanya rusa jantan yang memiliki tanduk bercabang.'},
+   {id:'ntt',prov:'Nusa Tenggara Timur',name:'Biawak Komodo',latin:'Varanus komodoensis',fact:'Selain Satwa Nasional, komodo juga fauna identitas NTT. Ia mencium bau mangsa dengan lidah bercabangnya.'}
+  ],
+  quiz:[
+   {q:'Ciri khas Jalak Bali adalah…',o:['Bulu putih dan kulit biru di sekitar mata','Bulu hijau dan paruh merah','Bulu hitam dengan 12 helai ekor seperti kawat','Bulu kuning dengan garis hitam di mata'],why:'Jalak Bali berbulu putih dengan kulit biru di sekitar mata.'},
+   {q:'Fauna identitas Nusa Tenggara Barat adalah…',o:['Rusa Timor','Biawak Komodo','Anoa','Jalak Bali'],why:'NTB memilih Rusa Timor; Komodo milik NTT.'},
+   {img:'ntt',q:'Satwa ini identitas NTT sekaligus Satwa Nasional. Namanya…',o:['Biawak Komodo','Biawak Air','Buaya Muara','Iguana'],why:'Biawak Komodo.'},
+   {q:'Pada Rusa Timor, yang memiliki tanduk adalah…',o:['Hanya rusa jantan','Hanya rusa betina','Jantan dan betina','Tidak ada yang bertanduk'],why:'Tanduk bercabang hanya tumbuh pada rusa jantan.'}
+  ]},
+ {id:'kalimantan',name:'Bilik Kalimantan',short:'Kalimantan',style:'betang',arch:'Rumah Betang',color:'#2fb5a8',dir:'timur laut',
+  intro:'Bilik ini meniru Rumah Betang, rumah panjang suku Dayak. Temui empat fauna identitas Kalimantan.',
+  fauna:[
+   {id:'kalbar',prov:'Kalimantan Barat',name:'Enggang Gading',latin:'Rhinoplax vigil',fact:'Rangkong dengan balung padat di atas paruh dan bulu ekor yang sangat panjang. Disakralkan masyarakat Dayak dan kini berstatus kritis.'},
+   {id:'kalteng',prov:'Kalimantan Tengah',name:'Kuau Kerdil Kalimantan',latin:'Polyplectron schleiermacheri',fact:'Burung sejenis merak kecil yang sangat langka di hutan dataran rendah Kalimantan. Bulunya berhias bintik mengilap.'},
+   {id:'kalsel',prov:'Kalimantan Selatan',name:'Bekantan',latin:'Nasalis larvatus',fact:'Monyet berhidung panjang endemik Kalimantan. Hidup di hutan bakau dan tepi sungai, serta pandai berenang.'},
+   {id:'kaltim',prov:'Kalimantan Timur',name:'Pesut Mahakam',latin:'Orcaella brevirostris',fact:'Lumba-lumba air tawar berkepala bulat yang hidup di Sungai Mahakam. Jumlahnya tinggal sedikit sehingga sangat dilindungi.'}
+  ],
+  quiz:[
+   {img:'kalsel',q:'Monyet pada gambar adalah identitas Kalimantan Selatan. Namanya…',o:['Bekantan','Orangutan','Owa','Tarsius'],why:'Bekantan, si monyet berhidung panjang.'},
+   {q:'Pesut Mahakam adalah fauna identitas…',o:['Kalimantan Timur','Kalimantan Barat','Kalimantan Tengah','Kalimantan Selatan'],why:'Pesut hidup di Sungai Mahakam, Kalimantan Timur.'},
+   {img:'kaltim',q:'Pesut Mahakam pada gambar termasuk jenis…',o:['Lumba-lumba air tawar','Hiu sungai','Paus kecil','Duyung'],why:'Pesut adalah lumba-lumba air tawar.'},
+   {q:'Fauna identitas Kalimantan Barat adalah…',o:['Enggang Gading','Kuau Kerdil Kalimantan','Julang Sulawesi','Cendrawasih Merah'],why:'Enggang Gading, rangkong yang disakralkan suku Dayak.'}
+  ]},
+ {id:'sulawesi',name:'Bilik Sulawesi',short:'Sulawesi',style:'tongkonan',arch:'Tongkonan',color:'#9b6bd6',dir:'timur',
+  intro:'Bilik beratap Tongkonan ini menyimpan enam fauna khas Sulawesi dan Gorontalo.',
+  fauna:[
+   {id:'sulsel',prov:'Sulawesi Selatan',name:'Julang Sulawesi',latin:'Rhyticeros cassidix',fact:'Rangkong besar endemik Sulawesi dengan balung merah dan paruh kuning. Ia membantu menyebarkan biji pohon di hutan.'},
+   {id:'sulbar',prov:'Sulawesi Barat',name:'Mandar Dengkur',latin:'Aramidopsis plateni',fact:'Burung mandar endemik Sulawesi yang jarang terlihat. Namanya berasal dari suaranya yang terdengar seperti orang mendengkur.'},
+   {id:'sultra',prov:'Sulawesi Tenggara',name:'Anoa',latin:'Bubalus depressicornis',fact:'Kerbau kerdil endemik Sulawesi. Tingginya kurang dari satu meter dengan tanduk lurus dan runcing.'},
+   {id:'sulteng',prov:'Sulawesi Tengah',name:'Maleo Senkawor',latin:'Macrocephalon maleo',fact:'Burung endemik Sulawesi yang bertelur di pasir panas bumi atau pantai. Telurnya dihangatkan panas alam, bukan dierami induknya.'},
+   {id:'gorontalo',prov:'Gorontalo',name:'Ikan Bulalao',latin:'ikan air tawar khas Gorontalo',fact:'Ikan kecil yang dipilih sebagai fauna identitas Gorontalo dalam film. Provinsi ini kaya perairan, seperti Danau Limboto dan Teluk Tomini.'},
+   {id:'sulut',prov:'Sulawesi Utara',name:'Tangkasi',latin:'Tarsius tarsier',fact:'Tarsius Sulawesi, salah satu primata terkecil di dunia. Matanya sangat besar dan kepalanya dapat berputar hampir setengah lingkaran.'}
+  ],
+  quiz:[
+   {img:'sultra',q:'Anoa, fauna identitas Sulawesi Tenggara, termasuk jenis…',o:['Kerbau kerdil','Rusa kecil','Babi hutan','Kambing hutan'],why:'Anoa adalah kerbau kerdil endemik Sulawesi.'},
+   {q:'Maleo Senkawor unik karena telurnya…',o:['Dihangatkan panas pasir alami','Dierami induk jantan','Disimpan di lubang pohon','Menetas di dalam air'],why:'Maleo mengubur telur di pasir yang hangat oleh panas bumi atau matahari.'},
+   {img:'sulut',q:'Primata bermata besar ini identitas Sulawesi Utara. Namanya…',o:['Tangkasi','Mentilin','Kukang','Bekantan'],why:'Tangkasi; sedangkan Mentilin adalah tarsius dari Bangka Belitung.'},
+   {q:'Julang Sulawesi adalah fauna identitas…',o:['Sulawesi Selatan','Sulawesi Barat','Sulawesi Tengah','Gorontalo'],why:'Julang Sulawesi milik Sulawesi Selatan.'},
+   {q:'Fauna identitas Sulawesi Barat adalah…',o:['Mandar Dengkur','Maleo Senkawor','Anoa','Ikan Bulalao'],why:'Mandar Dengkur, burung bersuara seperti mendengkur.'}
+  ]},
+ {id:'papua',name:'Bilik Maluku & Papua',short:'Maluku–Papua',style:'honai',arch:'Honai',color:'#3f8fe0',dir:'tenggara',
+  intro:'Bilik berbentuk Honai ini memajang burung-burung surga dan nuri dari timur Indonesia.',
+  fauna:[
+   {id:'malut',prov:'Maluku Utara',name:'Bidadari Halmahera',latin:'Semioptera wallacii',fact:'Cendrawasih endemik Halmahera. Jantannya punya dua pasang bulu putih panjang di bahu. Dikenalkan ke dunia sains oleh Alfred Russel Wallace.'},
+   {id:'maluku',prov:'Maluku',name:'Nuri Raja Ambon',latin:'Alisterus amboinensis',fact:'Burung paruh bengkok berkepala merah menyala dengan sayap hijau dan punggung biru, hidup di hutan Kepulauan Maluku.'},
+   {id:'pabar',prov:'Papua Barat',name:'Cendrawasih Merah',latin:'Paradisaea rubra',fact:'Burung surga endemik Raja Ampat (Waigeo dan Batanta). Jantannya berjumbai merah dengan dua pita ekor panjang yang melengkung.'},
+   {id:'papua',prov:'Papua',name:'Cendrawasih 12 Kawat',latin:'Seleucidis melanoleucus',fact:'Jantannya punya 12 helai bulu ekor yang mirip kawat melengkung. Tubuhnya hitam mengilap dengan perut kuning cerah.'}
+  ],
+  quiz:[
+   {q:'Cendrawasih yang dikenalkan Alfred Russel Wallace dan menjadi identitas Maluku Utara adalah…',o:['Bidadari Halmahera','Cendrawasih Merah','Cendrawasih 12 Kawat','Nuri Raja Ambon'],why:'Bidadari Halmahera (Semioptera wallacii) memakai nama Wallace.'},
+   {img:'papua',q:'Burung pada gambar disebut Cendrawasih 12 Kawat karena…',o:['Punya 12 helai bulu ekor mirip kawat','Bertelur 12 butir','Hidup di 12 pulau','Bulunya 12 warna'],why:'Dua belas helai bulu ekornya melengkung seperti kawat.'},
+   {q:'Fauna identitas Provinsi Maluku adalah…',o:['Nuri Raja Ambon','Bidadari Halmahera','Kakatua Seram','Maleo Senkawor'],why:'Nuri Raja Ambon.'},
+   {q:'Cendrawasih Merah adalah fauna identitas…',o:['Papua Barat','Papua','Maluku','Maluku Utara'],why:'Cendrawasih Merah dari Raja Ampat, Papua Barat.'}
+  ]}
+];
+const BOARDS=[
+ {id:'peta-sebaran',title:'Persebaran Hewan Indonesia',text:'Peta pembuka film memperlihatkan satwa khas yang tersebar dari Sumatra sampai Papua: orangutan, harimau, badak, komodo, maleo, anoa, kakatua, dan cendrawasih. Setiap provinsi memilih satu fauna identitas yang endemik, khas, atau menjadi komoditas andalan daerahnya.'},
+ {id:'peta-wallace',title:'Garis Wallace dan Garis Weber',text:'Garis Wallace (antara Bali–Lombok dan Kalimantan–Sulawesi) memisahkan fauna tipe Asiatis di barat dari fauna peralihan. Garis Weber memisahkan fauna peralihan dari fauna tipe Australis di timur (Papua dan Kepulauan Aru).'},
+ {id:'tipe-fauna',title:'Tiga Tipe Fauna Indonesia',text:'Tipe Asiatis: Sumatra, Jawa, Kalimantan, Bali (gajah, harimau, badak). Tipe Peralihan: Sulawesi, Nusa Tenggara, Maluku (anoa, maleo, komodo). Tipe Australis: Papua dan Aru (cendrawasih, kanguru pohon, kasuari).'}
+];
+const ACH=[
+ {id:'mulai',t:'Langkah Pertama',d:'Masuk ke Rimba Nusantara.'},
+ {id:'pemandu',t:'Kenalan Pemandu',d:'Mengobrol dengan Kak Rangkong.'},
+ {id:'peta',t:'Pembaca Peta',d:'Mempelajari tiga papan peta di gapura.'},
+ {id:'bilik1',t:'Masuk Bilik',d:'Masuk ke bilik pertamamu.'},
+ {id:'bilik7',t:'Penjelajah Tujuh Bilik',d:'Mengunjungi ketujuh bilik.'},
+ {id:'fauna12',t:'Pengamat Satwa',d:'Mengenali 12 fauna.'},
+ {id:'fauna36',t:'Ensiklopedia Hidup',d:'Mengenali seluruh 36 kartu fauna.'},
+ {id:'sempurna',t:'Tanpa Cela',d:'Menjawab semua soal satu kuis dengan benar.'},
+ {id:'permata1',t:'Permata Pertama',d:'Meraih permata dari altar bilik.'},
+ {id:'permata7',t:'Tujuh Permata',d:'Mengumpulkan ketujuh permata.'},
+ {id:'malam',t:'Penjelajah Malam',d:'Menjelajah rimba saat malam.'},
+ {id:'harta',t:'Penemu Harta Karun',d:'Membuka harta karun di Pulau Candi.'}
+];
+const ALL_FAUNA=[];ROOMS.forEach((r,ri)=>r.fauna.forEach(f=>{f.room=r;f.ri=ri;ALL_FAUNA.push(f);}));
+ROOMS.forEach(r=>r.quiz.forEach((q,i)=>{q.id=r.id+'-'+i;}));
+const MAX_POINTS=ALL_FAUNA.length*5+ROOMS.reduce((s,r)=>s+r.quiz.length*20,0)+ROOMS.length*50;
+
+/* =====================================================================
+   2. STATE
+   ===================================================================== */
+const KEY='rimbaNusantara.v1';
+const fresh=()=>({name:'',kelas:'',points:0,seen:{},gems:{},correct:{},visited:{},ach:{},boards:{},opened:false,sound:true,voice:true,time:0});
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}pushScore();}
+const gemCount=()=>ROOMS.filter(r=>S.gems[r.id]).length;
+const seenCount=()=>Object.keys(S.seen).length;
+
+/* =====================================================================
+   3. AUDIO (procedural: angin, air, burung, gamelan)
+   ===================================================================== */
+const SL=[392,448.8,515.5,591.9,680.1,784];
+const A={ctx:null,master:null,water:null,cricket:null,
+ init(){ if(this.ctx)return; try{
+  const C=window.AudioContext||window.webkitAudioContext; if(!C)return; const c=this.ctx=new C();
+  this.master=c.createGain(); this.master.gain.value=S.sound?0.9:0; this.master.connect(c.destination);
+  const buf=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=buf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const noise=()=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.start();return s;};
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;const wg=c.createGain();wg.gain.value=0.05;noise().connect(lp);lp.connect(wg);wg.connect(this.master);
+  const lfo=c.createOscillator();lfo.frequency.value=0.08;const lg=c.createGain();lg.gain.value=220;lfo.connect(lg);lg.connect(lp.frequency);lfo.start();
+  const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1100;bp.Q.value=0.7;this.water=c.createGain();this.water.gain.value=0;noise().connect(bp);bp.connect(this.water);this.water.connect(this.master);
+  const co=c.createOscillator();co.type='square';co.frequency.value=4300;const cm=c.createGain();cm.gain.value=0;const am=c.createOscillator();am.frequency.value=28;const amg=c.createGain();amg.gain.value=0.5;am.connect(amg);amg.connect(cm.gain);
+  this.cricket=c.createGain();this.cricket.gain.value=0;co.connect(cm);cm.connect(this.cricket);this.cricket.connect(this.master);co.start();am.start();
+  const loop=()=>{ if(nightAmt<0.5) this.birdSong(); setTimeout(loop,1500+Math.random()*3500); }; setTimeout(loop,1200);
+ }catch(e){this.ctx=null;} },
+ setOn(on){ if(this.master)this.master.gain.setTargetAtTime(on?0.9:0,this.ctx.currentTime,0.1); },
+ birdSong(){ const c=this.ctx;if(!c)return; const t=c.currentTime; const n=2+Math.floor(Math.random()*4); const base=2200+Math.random()*1800;
+  for(let i=0;i<n;i++){ const o=c.createOscillator(),g=c.createGain(); const t0=t+i*0.13; o.type='sine'; o.frequency.setValueAtTime(base,t0); o.frequency.exponentialRampToValueAtTime(base*(1.3+Math.random()*0.5),t0+0.08);
+   g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(0.025,t0+0.015); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.11); o.connect(g);g.connect(this.master);o.start(t0);o.stop(t0+0.13);} },
+ bell(f,dt=0,vol=0.18,dur=1.4){ const c=this.ctx;if(!c)return; const t=c.currentTime+dt;
+  [[1,1],[2.76,0.35],[5.4,0.12]].forEach(([m,a])=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f*m;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a,t+0.006);g.gain.exponentialRampToValueAtTime(0.0001,t+dur/m**0.3);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur+0.1);}); },
+ gong(dt=0,vol=0.35){ const c=this.ctx;if(!c)return; const t=c.currentTime+dt;
+  [[98,1],[99.2,0.8],[196.5,0.3],[294,0.12]].forEach(([f,a])=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+4);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+4.2);}); },
+ thud(){ const c=this.ctx;if(!c)return; const t=c.currentTime; const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(90,t+0.25); g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.35);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+0.4); },
+ sfx(n){ if(!this.ctx)return; if(this.ctx.state==='suspended')this.ctx.resume();
+  if(n==='seen'){this.bell(SL[3]*2,0,0.08,0.8);}
+  else if(n==='ok'){this.bell(SL[2],0,0.16);this.bell(SL[4],0.12,0.16);}
+  else if(n==='no'){this.thud();}
+  else if(n==='gem'){[0,1,2,3,4,5].forEach((i,k)=>this.bell(SL[i]*(k>4?1:1),k*0.1,0.15));this.gong(0.65,0.25);}
+  else if(n==='open'){[5,4,2,3,1,2,0].forEach((i,k)=>this.bell(SL[i],k*0.22,0.16,2));this.gong(0,0.45);this.gong(1.6,0.3);}
+  else if(n==='click'){this.bell(SL[0]*2,0,0.05,0.4);}
+  else if(n==='ach'){this.bell(SL[4]*2,0,0.1,1);this.bell(SL[5]*2,0.1,0.1,1.2);}
+ }
+};
+let voices=[];try{const lv=()=>{voices=speechSynthesis.getVoices();};lv();speechSynthesis.onvoiceschanged=lv;}catch(e){}
+function speak(text,force){ if(!force&&!S.voice)return; try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='id-ID'; const v=voices.find(v=>/^id/i.test(v.lang)); if(v)u.voice=v; u.rate=1; speechSynthesis.speak(u);}catch(e){} }
+
+/* =====================================================================
+   4. THREE SETUP
+   ===================================================================== */
+const canvas=$('world');
+const LOW=matchMedia('(pointer:coarse)').matches||Math.min(screen.width,screen.height)<700;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,LOW?1.3:1.75));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,900);
+camera.rotation.order='YXZ';
+scene.fog=new THREE.Fog(0xbcd9e0,50,250);
+const clock=new THREE.Clock();
+const TAU=Math.PI*2;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const smooth=(e0,e1,x)=>{let t=(x-e0)/(e1-e0);t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
+const col=c=>new THREE.Color(c);
+
+const R_ROOM=46,LAKE_R=20,ISLAND_R=7,WORLD_R=84,RW=10,RD=7,RH=5.2,PATH_R=32,WATER_Y=-0.7;
+function groundH(x,z){const r=Math.hypot(x,z);let h=0;
+ if(r<LAKE_R+3)h-=1.8*smooth(LAKE_R+3,LAKE_R-1.5,r);
+ const hill=smooth(70,120,r); if(hill>0)h+=hill*(9+4*Math.sin(x*0.06)+3*Math.sin(z*0.05+1.7)+2.5*Math.sin((x-z)*0.045));
+ return h;}
+
+/* textures */
+const loadMgr=new THREE.LoadingManager();
+const texLoader=new THREE.TextureLoader(loadMgr);
+const TEX={};
+function photo(id){ if(!TEX[id]){const t=texLoader.load('img/'+id+'.jpg');t.anisotropy=4;TEX[id]=t;} return TEX[id]; }
+ALL_FAUNA.forEach(f=>photo(f.id)); BOARDS.forEach(b=>photo(b.id));
+let loaded=false;
+loadMgr.onProgress=(u,a,b)=>{$('loadBar').style.width=(a/b*100)+'%';};
+loadMgr.onLoad=()=>{loaded=true;$('loadBar').style.width='100%';readyStart();};
+loadMgr.onError=()=>{};
+setTimeout(()=>{if(!loaded){loaded=true;readyStart();}},12000);
+
+function cvs(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function ctex(c,rep){const t=new THREE.CanvasTexture(c);t.anisotropy=4;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;}return t;}
+const glowTex=(()=>{const[c,g]=cvs(128,128);const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(0.25,'rgba(255,255,255,.6)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);return ctex(c);})();
+const cloudTex=(()=>{const[c,g]=cvs(256,128);for(let i=0;i<28;i++){const x=rand(50,206),y=rand(45,85),r=rand(18,42);const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();}return ctex(c);})();
+
+/* wall ornaments: tumpal, kawung, spiral dayak, zigzag asmat, lingkaran toraja */
+const STY={
+ rotunda:{base:'#efe6d2',surf:'marble',line:'#d8ccb2',b1:'#c99a2e',b2:'#7b1f1f',motif:'meander',floor:['#d9cfb8','#c8bc9f'],floorType:'tile',pillar:'#e6d8b5',trim:'#c99a2e'},
+ gonjong:{base:'#6b2a1c',surf:'planks',line:'#3d150d',b1:'#e3b23c',b2:'#1d1210',motif:'tumpal',floor:['#7a4a2a','#6a3e22'],floorType:'planks',pillar:'#3a1a10',trim:'#e3b23c'},
+ joglo:{base:'#8a5a32',surf:'planks',line:'#5a381c',b1:'#2a1a0e',b2:'#d9b26a',motif:'kawung',floor:['#a0754a','#8f6740'],floorType:'planks',pillar:'#5a381c',trim:'#d9b26a'},
+ meru:{base:'#a8492f',surf:'bricks',line:'#e2cdb0',b1:'#d8c7a5',b2:'#4a3a2a',motif:'tumpal',floor:['#cbbd9f','#b8a988'],floorType:'tile',pillar:'#d8c7a5',trim:'#c9a44a'},
+ betang:{base:'#7a5634',surf:'planks',line:'#4a3220',b1:'#f2efe6',b2:'#1b1b1b',motif:'spiral',floor:['#8d6a44','#7c5c3a'],floorType:'planks',pillar:'#3b2a1a',trim:'#e9e2cf'},
+ tongkonan:{base:'#3a1f17',surf:'planks',line:'#1e0f0b',b1:'#c33a26',b2:'#f0c34a',motif:'toraja',floor:['#6b4a33','#5c3f2b'],floorType:'planks',pillar:'#1e0f0b',trim:'#c33a26'},
+ honai:{base:'#8b6a45',surf:'vplanks',line:'#5d4529',b1:'#f3efe4',b2:'#b23324',motif:'zigzag',floor:['#9c7b52','#8a6b46'],floorType:'planks',pillar:'#4a3520',trim:'#f3efe4'}
+};
+function drawMotif(g,m,y,h,b1,b2){
+ g.save();g.fillStyle=b2;g.fillRect(0,y,512,h);g.fillStyle=b1;g.fillRect(0,y,512,5);g.fillRect(0,y+h-5,512,5);
+ const cy=y+h/2;
+ if(m==='tumpal'){for(let x=0;x<512;x+=32){g.fillStyle=b1;g.beginPath();g.moveTo(x,y+h-6);g.lineTo(x+16,y+8);g.lineTo(x+32,y+h-6);g.fill();g.fillStyle=b2;g.beginPath();g.moveTo(x+8,y+h-6);g.lineTo(x+16,y+h*0.45);g.lineTo(x+24,y+h-6);g.fill();}}
+ else if(m==='kawung'){g.fillStyle=b1;for(let x=16;x<512;x+=32){for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;g.beginPath();g.ellipse(x+Math.cos(a)*8,cy+Math.sin(a)*8,9,5,a,0,TAU);g.fill();}}}
+ else if(m==='spiral'){g.strokeStyle=b1;g.lineWidth=4;for(let x=0;x<512;x+=64){g.beginPath();for(let t=0;t<12;t+=0.2){const r=2+t*1.6;g.lineTo(x+20+Math.cos(t)*r,cy+Math.sin(t)*r);}g.stroke();g.beginPath();for(let t=0;t<12;t+=0.2){const r=2+t*1.6;g.lineTo(x+52-Math.cos(t)*r,cy-Math.sin(t)*r);}g.stroke();}}
+ else if(m==='zigzag'){g.strokeStyle=b1;g.lineWidth=6;for(let row=0;row<2;row++){g.beginPath();for(let x=0;x<=512;x+=20){g.lineTo(x,cy-12+row*20+((x/20)%2?-8:8));}g.stroke();}}
+ else if(m==='toraja'){for(let x=24;x<512;x+=48){g.fillStyle=b1;g.beginPath();g.arc(x,cy,16,0,TAU);g.fill();g.fillStyle=b2;g.beginPath();g.arc(x,cy,10,0,TAU);g.fill();g.fillStyle='#111';g.beginPath();g.arc(x,cy,4,0,TAU);g.fill();g.fillStyle=b2;g.beginPath();g.moveTo(x+24,y+8);g.lineTo(x+32,cy);g.lineTo(x+24,y+h-8);g.lineTo(x+16,cy);g.fill();}}
+ else if(m==='meander'){g.strokeStyle=b1;g.lineWidth=5;g.beginPath();for(let x=0;x<512;x+=32){g.moveTo(x,cy+14);g.lineTo(x,cy-14);g.lineTo(x+22,cy-14);g.lineTo(x+22,cy+4);g.lineTo(x+10,cy+4);g.lineTo(x+10,cy-4);}g.stroke();}
+ g.restore();}
+function wallTexture(style){
+ const s=STY[style];const[c,g]=cvs(512,512);g.fillStyle=s.base;g.fillRect(0,0,512,512);
+ if(s.surf==='planks'||s.surf==='vplanks'){for(let x=0;x<512;x+=32){g.fillStyle=`rgba(${Math.random()<.5?255:0},${Math.random()<.5?255:0},0,${rand(0,.05)})`;g.fillRect(x,0,32,512);g.fillStyle=s.line;g.fillRect(x+30,0,2,512);for(let k=0;k<5;k++){g.strokeStyle='rgba(0,0,0,.08)';g.beginPath();const gx=x+rand(4,28);g.moveTo(gx,0);g.bezierCurveTo(gx+rand(-4,4),170,gx+rand(-4,4),340,gx,512);g.stroke();}}}
+ else if(s.surf==='bricks'){for(let y=0,r=0;y<512;y+=24,r++){for(let x=(r%2)*24-24;x<512;x+=48){g.fillStyle=`hsl(${rand(10,18)},${rand(45,58)}%,${rand(36,44)}%)`;g.fillRect(x+1,y+1,46,22);}}g.fillStyle=s.line;}
+ else if(s.surf==='marble'){g.strokeStyle='rgba(120,110,90,.18)';for(let i=0;i<14;i++){g.lineWidth=rand(.5,2);g.beginPath();let x=rand(0,512),y=0;g.moveTo(x,y);while(y<512){x+=rand(-30,30);y+=rand(20,60);g.lineTo(x,y);}g.stroke();}}
+ drawMotif(g,s.motif,56,80,s.b1,s.b2);drawMotif(g,s.motif==='meander'?'meander':'tumpal',470,42,s.b1,s.b2);
+ return ctex(c,true);}
+function floorTexture(style){const s=STY[style];const[c,g]=cvs(256,256);
+ if(s.floorType==='tile'){for(let y=0;y<256;y+=64)for(let x=0;x<256;x+=64){g.fillStyle=((x+y)/64)%2?s.floor[0]:s.floor[1];g.fillRect(x,y,64,64);g.strokeStyle='rgba(0,0,0,.15)';g.strokeRect(x+.5,y+.5,63,63);}}
+ else{for(let y=0;y<256;y+=16){g.fillStyle=(y/16)%2?s.floor[0]:s.floor[1];g.fillRect(0,y,256,16);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,y+15,256,1);const o=(y*37)%256;g.fillRect(o,y,1,16);g.fillRect((o+128)%256,y,1,16);}}
+ const t=ctex(c,true);t.repeat.set(5,3.5);return t;}
+function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+function plateTexture(top,main,accent,seen){const[c,g]=cvs(512,112);
+ g.fillStyle='#1d140c';roundRect(g,2,2,508,108,14);g.fill();g.strokeStyle=accent;g.lineWidth=4;roundRect(g,6,6,500,100,11);g.stroke();
+ g.fillStyle=accent;g.font='700 22px "Plus Jakarta Sans", sans-serif';g.textAlign='center';g.fillText(top.toUpperCase().split('').join(String.fromCharCode(8202)),256,40);
+ g.fillStyle='#f5ecd6';g.font='800 36px Cinzel, Georgia, serif';g.fillText(main,256,84,470);
+ if(seen){g.fillStyle='#5fd08a';g.beginPath();g.arc(476,34,15,0,TAU);g.fill();g.strokeStyle='#0d2a18';g.lineWidth=4;g.beginPath();g.moveTo(468,34);g.lineTo(474,40);g.lineTo(485,27);g.stroke();}
+ return ctex(c);}
+function signTexture(title,sub,accent){const[c,g]=cvs(768,144);
+ g.fillStyle='#21160d';g.fillRect(0,0,768,144);g.fillStyle=accent;for(let x=0;x<768;x+=24){g.beginPath();g.moveTo(x,0);g.lineTo(x+12,12);g.lineTo(x+24,0);g.fill();g.beginPath();g.moveTo(x,144);g.lineTo(x+12,132);g.lineTo(x+24,144);g.fill();}
+ g.textAlign='center';g.fillStyle='#f6e7c2';g.font='800 50px Cinzel, Georgia, serif';g.fillText(title,384,74,720);g.fillStyle=accent;g.font='700 24px "Plus Jakarta Sans", sans-serif';g.fillText(sub,384,112,720);return ctex(c);}
+function textSprite(text,color,size){const[c,g]=cvs(512,128);g.font=`800 ${size||54}px Cinzel, Georgia, serif`;g.textAlign='center';g.lineWidth=8;g.strokeStyle='rgba(0,0,0,.55)';g.strokeText(text,256,82);g.fillStyle=color||'#fff';g.fillText(text,256,82);
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:ctex(c),transparent:true,depthWrite:false}));sp.scale.set(8,2,1);return sp;}
+
+/* =====================================================================
+   5. SKY, LIGHT, ATMOSPHERE
+   ===================================================================== */
+const skyU={uTop:{value:col('#3d8fd6')},uHor:{value:col('#bfe3f2')},uBot:{value:col('#6d8f6a')},uSun:{value:new THREE.Vector3(0,1,0)},uSunCol:{value:col('#fff2d6')},uSize:{value:800}};
+const sky=new THREE.Mesh(new THREE.SphereGeometry(500,32,16),new THREE.ShaderMaterial({uniforms:skyU,side:THREE.BackSide,depthWrite:false,fog:false,
+ vertexShader:'varying vec3 vP;void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:'uniform vec3 uTop,uHor,uBot,uSun,uSunCol;uniform float uSize;varying vec3 vP;void main(){float h=vP.y;vec3 c=h>0.?mix(uHor,uTop,pow(h,.55)):mix(uHor,uBot,min(-h*5.,1.));float s=max(dot(vP,normalize(uSun)),0.);c+=uSunCol*(smoothstep(1.-1.2/uSize,1.-0.8/uSize,s)*1.4+pow(s,10.)*.28);gl_FragColor=vec4(c,1.);}'}));
+sky.renderOrder=-1;scene.add(sky);
+const hemi=new THREE.HemisphereLight(0xcfe8ff,0x4b5e34,0.7);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d6,1.25);sun.castShadow=true;sun.shadow.mapSize.set(LOW?1024:2048,LOW?1024:2048);
+Object.assign(sun.shadow.camera,{left:-75,right:75,top:75,bottom:-75,near:10,far:300});sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.03;scene.add(sun);scene.add(sun.target);
+const stars=(()=>{const n=900,p=new Float32Array(n*3);for(let i=0;i<n;i++){const a=rand(0,TAU),y=rand(0.08,1),r=Math.sqrt(1-y*y);p.set([Math.cos(a)*r*470,y*470,Math.sin(a)*r*470],i*3);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));
+ const m=new THREE.PointsMaterial({color:0xffffff,size:1.6,sizeAttenuation:false,transparent:true,opacity:0,fog:false,depthWrite:false});const s=new THREE.Points(g,m);scene.add(s);return s;})();
+const PRESETS=[
+ {name:'Siang',el:55,az:35,top:'#3d8fd6',hor:'#c4e4f1',bot:'#6d8f6a',fog:'#bcd9e0',sunC:'#fff2d6',sunI:1.3,hs:'#d6ecff',hg:'#4b5e34',hI:0.72,night:0,size:800,far:330},
+ {name:'Senja',el:7,az:-70,top:'#2f4278',hor:'#f39a5a',bot:'#523a3a',fog:'#d99a72',sunC:'#ffae66',sunI:1.05,hs:'#f5b98a',hg:'#3a3030',hI:0.55,night:0.35,size:380,far:280},
+ {name:'Malam',el:42,az:-20,top:'#040817',hor:'#162a50',bot:'#0b1020',fog:'#0f1a33',sunC:'#a9bcff',sunI:0.42,hs:'#4a62a8',hg:'#0e1410',hI:0.42,night:1,size:520,far:230}
+];
+const cur={top:col('#3d8fd6'),hor:col('#c4e4f1'),bot:col('#6d8f6a'),fog:col('#bcd9e0'),sunC:col('#fff2d6'),hs:col('#d6ecff'),hg:col('#4b5e34'),sunI:1.3,hI:0.72,night:0,el:55,az:35,size:800,far:330};
+let nightAmt=0;
+function applySky(dt,instant){const P=PRESETS[S.time];const k=instant?1:1-Math.exp(-dt*1.6);
+ ['top','hor','bot','fog','sunC','hs','hg'].forEach(key=>cur[key].lerp(col(P[key]),k));['sunI','hI','night','el','az','size','far'].forEach(key=>cur[key]+=(P[key]-cur[key])*k);
+ nightAmt=cur.night;const el=cur.el*Math.PI/180,az=cur.az*Math.PI/180;const dir=new THREE.Vector3(Math.cos(el)*Math.sin(az),Math.sin(el),Math.cos(el)*Math.cos(az));
+ skyU.uTop.value.copy(cur.top);skyU.uHor.value.copy(cur.hor);skyU.uBot.value.copy(cur.bot);skyU.uSun.value.copy(dir);skyU.uSunCol.value.copy(cur.sunC);skyU.uSize.value=cur.size;
+ scene.fog.color.copy(cur.fog);scene.fog.far=cur.far;sun.color.copy(cur.sunC);sun.intensity=cur.sunI;hemi.color.copy(cur.hs);hemi.groundColor.copy(cur.hg);hemi.intensity=cur.hI;
+ sun.position.copy(dir).multiplyScalar(150);stars.material.opacity=Math.max(0,cur.night-0.3)*1.2;
+ waterU.uSun.value.copy(dir);waterU.uSky.value.copy(cur.hor);waterU.uNight.value=cur.night;
+ lanternMat.opacity=0.35+cur.night*0.65;fireflies.material.opacity=Math.max(0,cur.night-0.2)*1.1;
+ if(A.cricket&&A.ctx)A.cricket.gain.setTargetAtTime(cur.night>0.6?0.012:0,A.ctx.currentTime,0.5);}
+
+/* =====================================================================
+   6. TERRAIN, WATER, VEGETATION
+   ===================================================================== */
+const terrain=(()=>{const g=new THREE.PlaneGeometry(420,420,210,210);g.rotateX(-Math.PI/2);const p=g.attributes.position;const cols=new Float32Array(p.count*3);const c=new THREE.Color();
+ for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);const h=groundH(x,z);p.setY(i,h);const r=Math.hypot(x,z);
+  const sand=smooth(LAKE_R+4.5,LAKE_R+1.5,r);const path=1-smooth(1.6,2.8,Math.abs(r-PATH_R));const n=0.5+0.5*Math.sin(x*0.31)*Math.sin(z*0.27);
+  c.setHSL(0.27+n*0.04,0.5,0.24+n*0.06);if(h>3)c.lerp(col('#3d5a35'),smooth(3,12,h));c.lerp(col('#c9b27e'),Math.max(sand,path*0.85));if(r<LAKE_R)c.lerp(col('#6b5a3a'),smooth(LAKE_R,LAKE_R-2,r));cols.set([c.r,c.g,c.b],i*3);}
+ g.setAttribute('color',new THREE.BufferAttribute(cols,3));g.computeVertexNormals();
+ const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));m.receiveShadow=true;scene.add(m);return m;})();
+
+const waterU={uTime:{value:0},uSun:{value:new THREE.Vector3(0,1,0)},uSky:{value:col('#c4e4f1')},uNight:{value:0}};
+const water=new THREE.Mesh(new THREE.CircleGeometry(LAKE_R+3.5,96),new THREE.ShaderMaterial({uniforms:waterU,transparent:true,depthWrite:false,
+ vertexShader:'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
+ fragmentShader:`uniform float uTime,uNight;uniform vec3 uSun,uSky;varying vec3 vW;
+ void main(){vec2 p=vW.xz;float t=uTime;
+  vec3 n=normalize(vec3(cos(p.x*.9+t*1.3)*.12+cos((p.x+p.y)*2.1+t*2.)*.05,1.,cos(p.y*.8-t*1.1)*.12+sin((p.x-p.y)*1.7-t*1.6)*.05));
+  vec3 v=normalize(cameraPosition-vW);float fr=pow(1.-max(dot(n,v),0.),3.);
+  float d=length(p)/${(LAKE_R+0.0).toFixed(1)};vec3 deep=mix(vec3(.05,.32,.36),vec3(.02,.06,.12),uNight);vec3 shal=mix(vec3(.25,.62,.55),vec3(.05,.12,.18),uNight);
+  vec3 c=mix(deep,shal,smoothstep(.55,1.05,d));c=mix(c,uSky,fr*.55);
+  float sp=pow(max(dot(reflect(-v,n),normalize(uSun)),0.),160.)*1.6;c+=vec3(1.,.95,.85)*sp;
+  float foam=smoothstep(1.02,1.1,d+sin(atan(p.y,p.x)*24.+t*1.5)*.012);c=mix(c,vec3(.9),foam*.35);
+  gl_FragColor=vec4(c,.9);}`}));
+water.rotation.x=-Math.PI/2;water.position.y=WATER_Y;scene.add(water);
+
+/* exclusion helper so vegetation does not grow inside buildings or paths */
+const roomRects=[];
+function blocked(x,z,pad){const r=Math.hypot(x,z);if(r<LAKE_R+2.5)return true;if(Math.abs(r-PATH_R)<2.6)return true;
+ if(Math.abs(x)<14&&z>38&&z<70)return true; if(Math.abs(x)<2.5&&z>0)return true;
+ for(const rr of roomRects){const dx=x-rr.cx,dz=z-rr.cz;const lx=dx*Math.cos(rr.a)-dz*Math.sin(rr.a),lz=dx*Math.sin(rr.a)+dz*Math.cos(rr.a);
+  if(Math.abs(lx)<RW+(pad||3)&&lz>-RD-(pad||3)&&lz<RD+(pad||3)+8)return true;
+  if(Math.abs(lx)<2.5&&lz>0&&lz<20)return true;}
+ return false;}
+function ringPoint(rMin,rMax,pad){for(let k=0;k<40;k++){const a=rand(0,TAU),r=Math.sqrt(rand(rMin*rMin,rMax*rMax));const x=Math.cos(a)*r,z=Math.sin(a)*r;if(!blocked(x,z,pad))return[x,z];}return null;}
+const dummy=new THREE.Object3D();
+const grassU={uTime:{value:0}};
+function buildVegetation(){
+ // grass
+ const N=LOW?12000:22000;const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-0.07,0,0,0.07,0,0,0,0.65,0.02]),3));bg.computeVertexNormals();
+ const gm=new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
+ gm.onBeforeCompile=s=>{s.uniforms.uTime=grassU.uTime;s.vertexShader='uniform float uTime;\n'+s.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+  vec4 ip=instanceMatrix*vec4(0.,0.,0.,1.);float sw=sin(uTime*1.7+ip.x*.35+ip.z*.22)*.2+sin(uTime*3.3+ip.x*1.3)*.05;transformed.x+=sw*position.y;transformed.z+=sw*.5*position.y;`);};
+ const grass=new THREE.InstancedMesh(bg,gm,N);const c=new THREE.Color();let n=0;
+ for(let i=0;i<N*1.6&&n<N;i++){const pt=ringPoint(LAKE_R+2.5,92,0.5);if(!pt)continue;const[x,z]=pt;dummy.position.set(x,groundH(x,z),z);dummy.rotation.set(0,rand(0,TAU),0);const s=rand(.6,1.5);dummy.scale.set(s,s*rand(.7,1.3),s);dummy.updateMatrix();grass.setMatrixAt(n,dummy.matrix);c.setHSL(rand(.22,.3),rand(.45,.65),rand(.22,.36));grass.setColorAt(n,c);n++;}
+ grass.count=n;scene.add(grass);
+ // rainforest trees
+ const TN=230;const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.28,0.5,1,7),new THREE.MeshLambertMaterial({color:0x5b4632}),TN);
+ const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshPhongMaterial({flatShading:true,shininess:0}),TN*3);
+ trunk.castShadow=crown.castShadow=true;let ti=0,ci=0;
+ for(let i=0;i<TN*3&&ti<TN;i++){const pt=ringPoint(ti<40?40:56,150,3);if(!pt)continue;const[x,z]=pt;if(Math.hypot(x,z)<52&&Math.random()<0.6)continue;const y=groundH(x,z);const h=rand(6,12);
+  dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,0,0);dummy.scale.set(1,h,1);dummy.updateMatrix();trunk.setMatrixAt(ti,dummy.matrix);
+  for(let k=0;k<3;k++){const s=rand(2.4,4.2);dummy.position.set(x+rand(-1.6,1.6),y+h+rand(-0.8,1.4),z+rand(-1.6,1.6));dummy.rotation.set(rand(0,3),rand(0,3),0);dummy.scale.set(s,s*rand(.7,.95),s);dummy.updateMatrix();crown.setMatrixAt(ci,dummy.matrix);c.setHSL(rand(.25,.33),rand(.45,.6),rand(.18,.3));crown.setColorAt(ci,c);ci++;}ti++;}
+ trunk.count=ti;crown.count=ci;scene.add(trunk,crown);
+ // palms around the lake and the plaza
+ const PN=34,LEAVES=8;const pt=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.16,0.28,1,6),new THREE.MeshLambertMaterial({color:0x7a6248}),PN);
+ const lg=new THREE.ConeGeometry(0.55,4.2,4,1);lg.translate(0,2.1,0);lg.scale(1,1,0.18);
+ const lv=new THREE.InstancedMesh(lg,new THREE.MeshLambertMaterial({color:0x3f8a3a,side:THREE.DoubleSide}),PN*LEAVES);pt.castShadow=lv.castShadow=true;let pi=0,li=0;
+ const palmSpots=[];for(let i=0;i<PN-8;i++){const a=rand(0,TAU),r=rand(LAKE_R+3.5,PATH_R-3);palmSpots.push([Math.cos(a)*r,Math.sin(a)*r]);}
+ [[-11,47],[11,47],[-12,60],[12,60],[-13,66],[13,66],[-10,40],[10,40]].forEach(p=>palmSpots.push(p));
+ const tmp=new THREE.Object3D();
+ palmSpots.forEach(([x,z])=>{if(Math.abs(x)<3&&z>0)return;const h=rand(6,9),lean=rand(-.25,.25),y=groundH(x,z);dummy.position.set(x+lean*h/2,y+h/2,z);dummy.rotation.set(0,0,-lean);dummy.scale.set(1,h,1);dummy.updateMatrix();pt.setMatrixAt(pi++,dummy.matrix);
+  const tx=x+lean*h,ty=y+h*Math.cos(lean);for(let k=0;k<LEAVES;k++){tmp.position.set(tx,ty,z);tmp.rotation.set(0,k/LEAVES*TAU+rand(-.2,.2),0);tmp.rotateX(rand(1.0,1.5));tmp.updateMatrix();lv.setMatrixAt(li,tmp.matrix);c.setHSL(rand(.26,.31),.5,rand(.25,.33));lv.setColorAt(li,c);li++;}});
+ pt.count=pi;lv.count=li;scene.add(pt,lv);
+ // bamboo clumps
+ const BN=260;const bam=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09,0.11,1,6),new THREE.MeshLambertMaterial({color:0x6f9a3c}),BN);bam.castShadow=true;let bi=0;
+ for(let cl=0;cl<26;cl++){const p=ringPoint(36,62,2);if(!p)continue;for(let k=0;k<10&&bi<BN;k++){const x=p[0]+rand(-1,1),z=p[1]+rand(-1,1),h=rand(5,9);dummy.position.set(x,h/2,z);dummy.rotation.set(rand(-.12,.12),0,rand(-.12,.12));dummy.scale.set(1,h,1);dummy.updateMatrix();bam.setMatrixAt(bi,dummy.matrix);c.setHSL(rand(.2,.26),.5,rand(.3,.42));bam.setColorAt(bi,c);bi++;}}
+ bam.count=bi;scene.add(bam);
+ // flowers & rocks
+ const FN=700;const fl=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.16,0),new THREE.MeshLambertMaterial(),FN);const fc=['#e63946','#ffb703','#ff6fa5','#f1faee','#fb8500','#c77dff'];let fi=0;
+ for(let i=0;i<FN*2&&fi<FN;i++){const p=ringPoint(LAKE_R+3,70,1);if(!p)continue;const n0=2+Math.floor(rand(0,5));for(let k=0;k<n0&&fi<FN;k++){const x=p[0]+rand(-.8,.8),z=p[1]+rand(-.8,.8);dummy.position.set(x,rand(.25,.5),z);dummy.rotation.set(0,0,0);dummy.scale.setScalar(rand(.7,1.3));dummy.updateMatrix();fl.setMatrixAt(fi,dummy.matrix);fl.setColorAt(fi,col(fc[Math.floor(rand(0,fc.length))]));fi++;}}
+ fl.count=fi;scene.add(fl);
+ const RN=90;const rk=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),new THREE.MeshPhongMaterial({color:0x7d7a70,flatShading:true,shininess:0}),RN);rk.castShadow=true;rk.receiveShadow=true;let ri=0;
+ for(let i=0;i<RN;i++){let x,z;if(i<30){const a=rand(0,TAU),r=rand(LAKE_R+0.5,LAKE_R+2.5);x=Math.cos(a)*r;z=Math.sin(a)*r;if(Math.abs(x)<3&&z>0)continue;}else{const p=ringPoint(36,90,2);if(!p)continue;[x,z]=p;}
+  const s=rand(.4,1.4);dummy.position.set(x,groundH(x,z)+s*0.2,z);dummy.rotation.set(rand(0,3),rand(0,3),rand(0,3));dummy.scale.set(s*rand(1,1.6),s*rand(.6,1),s);dummy.updateMatrix();rk.setMatrixAt(ri++,dummy.matrix);}
+ rk.count=ri;scene.add(rk);
+ // lily pads and lotus
+ const LN=55;const pad=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.7,0.7,0.04,14,1,false,0.4,TAU-0.4),new THREE.MeshLambertMaterial({color:0x3f7f3a}),LN);const lot=new THREE.InstancedMesh(new THREE.ConeGeometry(0.2,0.3,7),new THREE.MeshLambertMaterial({color:0xff8fb8}),LN);let lp=0,lo=0;
+ for(let i=0;i<LN;i++){const a=rand(0,TAU),r=rand(ISLAND_R+2.5,LAKE_R-1);const x=Math.cos(a)*r,z=Math.sin(a)*r;if(Math.abs(x)<3&&z>0)continue;const s=rand(.6,1.3);dummy.position.set(x,WATER_Y+0.03,z);dummy.rotation.set(0,rand(0,TAU),0);dummy.scale.set(s,1,s);dummy.updateMatrix();pad.setMatrixAt(lp++,dummy.matrix);
+  if(Math.random()<.45){dummy.position.y+=0.15;dummy.scale.setScalar(1);dummy.rotation.set(0,0,0);dummy.updateMatrix();lot.setMatrixAt(lo++,dummy.matrix);}}
+ pad.count=lp;lot.count=lo;scene.add(pad,lot);
+ // rafflesia near Sumatra side
+ [[-36,-12],[-38,12]].forEach(([x,z])=>{const g=new THREE.Group();const pm=new THREE.MeshLambertMaterial({color:0xb3261e});for(let k=0;k<5;k++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.6,12,8),pm);p.scale.set(1,.25,1.1);const a=k/5*TAU;p.position.set(Math.cos(a)*0.65,0.12,Math.sin(a)*0.65);g.add(p);}
+  const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.36,0.35,16,1,true),new THREE.MeshLambertMaterial({color:0x8a1d18,side:THREE.DoubleSide}));cup.position.y=0.3;g.add(cup);g.position.set(x,0,z);scene.add(g);});
+}
+
+/* distant mountains, volcano and clouds */
+const smokes=[];
+(function(){const mm=new THREE.MeshPhongMaterial({color:0x557a66,flatShading:true,shininess:0});
+ for(let i=0;i<12;i++){const a=i/12*TAU+rand(-.15,.15),r=rand(190,240);const h=rand(45,95);const m=new THREE.Mesh(new THREE.ConeGeometry(rand(55,90),h,9,3),mm);m.position.set(Math.cos(a)*r,h/2-4,Math.sin(a)*r);m.rotation.y=rand(0,3);scene.add(m);}
+ const vol=new THREE.Mesh(new THREE.CylinderGeometry(9,70,105,12,3),new THREE.MeshPhongMaterial({color:0x5b6a5e,flatShading:true,shininess:0}));vol.position.set(-60,48,-215);scene.add(vol);
+ const sm=new THREE.SpriteMaterial({map:cloudTex,color:0xdcdcdc,transparent:true,opacity:.6,depthWrite:false});
+ for(let i=0;i<10;i++){const s=new THREE.Sprite(sm.clone());s.userData.t=i/10;smokes.push(s);scene.add(s);}
+})();
+const clouds=[];
+for(let i=0;i<26;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex,transparent:true,opacity:rand(.55,.9),depthWrite:false,fog:false}));const a=rand(0,TAU),r=rand(60,280);s.position.set(Math.cos(a)*r,rand(70,110),Math.sin(a)*r);const sc=rand(50,95);s.scale.set(sc,sc*0.5,1);s.userData.v=rand(.6,1.6);clouds.push(s);scene.add(s);}
+
+/* fireflies */
+const fireflies=(()=>{const n=220,p=new Float32Array(n*3),seed=[];for(let i=0;i<n;i++){const pt=ringPoint(LAKE_R+2,70,1)||[0,30];seed.push([pt[0],rand(.4,3),pt[1],rand(0,TAU)]);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));const m=new THREE.PointsMaterial({color:0xd8ff7a,size:0.35,map:glowTex,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+ const pts=new THREE.Points(g,m);pts.userData.seed=seed;scene.add(pts);return pts;})();
+
+/* butterflies & birds */
+const butterflies=[];
+function makeButterfly(){const g=new THREE.Group();const c=col(['#ffb703','#4cc9f0','#f72585','#f1faee','#80ed99'][Math.floor(rand(0,5))]);const wm=new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide});
+ const wg=new THREE.PlaneGeometry(0.32,0.24);wg.translate(0.16,0,0);const l=new THREE.Mesh(wg,wm),r=new THREE.Mesh(wg,wm);r.rotation.y=Math.PI;g.add(l,r);g.userData={l,r,home:ringPoint(LAKE_R+3,60,1)||[0,30],ph:rand(0,TAU),sp:rand(.4,.9)};scene.add(g);butterflies.push(g);}
+const birds=[];
+function makeBird(i){const g=new THREE.Group();const m=new THREE.MeshLambertMaterial({color:0x222222,side:THREE.DoubleSide});const wg=new THREE.PlaneGeometry(1.4,0.45);wg.translate(0.7,0,0);wg.rotateX(-Math.PI/2);
+ const l=new THREE.Mesh(wg,m),r=new THREE.Mesh(wg,m);r.rotation.y=Math.PI;const body=new THREE.Mesh(new THREE.ConeGeometry(0.18,1,5),m);body.rotation.x=Math.PI/2;g.add(l,r,body);g.userData={l,r,rad:rand(30,60),h:rand(26,40),sp:rand(.08,.14)*(i%2?1:-1),ph:rand(0,TAU)};scene.add(g);birds.push(g);}
+
+/* =====================================================================
+   7. BUILDINGS: tujuh bilik
+   ===================================================================== */
+const colliders=[];      // world AABB {x0,x1,z0,z1}
+const interactables=[];  // {type,pos,range,label,...}
+const pickables=[];
+function box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(parent||scene).add(m);return m;}
+function toWorld(r,lx,lz){return[r.cx+lx*Math.cos(r.a)+lz*Math.sin(r.a),r.cz-lx*Math.sin(r.a)+lz*Math.cos(r.a)];}
+function toLocal(r,x,z){const dx=x-r.cx,dz=z-r.cz;return[dx*Math.cos(r.a)-dz*Math.sin(r.a),dx*Math.sin(r.a)+dz*Math.cos(r.a)];}
+function saddleRoof(L,Dz,rise,lift,over,mat,taper){const segs=30,pos=[],idx=[];
+ for(const s of[-1,1]){const base=pos.length/3;for(let i=0;i<=segs;i++){const u=-1+2*i/segs,cv=Math.pow(Math.abs(u),3);const x=u*(L/2+over*cv);
+  pos.push(x,rise+lift*cv,0, x,lift*cv*0.9,s*(Dz/2+1.1)*(1-(taper||0)*cv));}
+  for(let i=0;i<segs;i++){const a=base+i*2;idx.push(a,a+1,a+2, a+1,a+3,a+2);}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();const m=new THREE.Mesh(g,mat);m.castShadow=true;return m;}
+function frustum(hx,hz,h,topFrac,mat){const g=new THREE.CylinderGeometry(topFrac*Math.SQRT2,Math.SQRT2,h,4,1);g.rotateY(Math.PI/4);g.scale(hx,1,hz);const m=new THREE.Mesh(g,mat);m.castShadow=true;return m;}
+function frameSlots(n){const s=[];const back=n<=5?n:4;const sides=n-back;const L=Math.ceil(sides/2),Rr=Math.floor(sides/2);
+ const sp=back<=3?5:(back===4?4.6:3.9);for(let i=0;i<back;i++)s.push({lx:(i-(back-1)/2)*sp,lz:-RD+0.32,ry:0});
+ const side=(cnt,sx,ry)=>{if(cnt<=0)return;const zs=cnt===1?[0]:cnt===2?[-2.6,2.6]:[-4.3,0,4.3];zs.forEach(z=>s.push({lx:sx,lz:z,ry}));};side(L,-RW+0.32,Math.PI/2);side(Rr,RW-0.32,-Math.PI/2);return s;}
+const frames=[];const altars=[];
+function buildRoom(room,i){
+ const phi=(i+1)*Math.PI/4;room.cx=-R_ROOM*Math.sin(phi);room.cz=R_ROOM*Math.cos(phi);room.a=Math.atan2(-room.cx,-room.cz);roomRects.push(room);
+ const g=new THREE.Group();g.position.set(room.cx,0,room.cz);g.rotation.y=room.a;scene.add(g);room.group=g;
+ const st=STY[room.style];const wt=wallTexture(room.style);const wmat=(len)=>{const t=wt.clone();t.needsUpdate=true;t.repeat.set(Math.max(1,Math.round(len/5.2)),1);return new THREE.MeshLambertMaterial({map:t});};
+ const T=0.4;
+ box(2*RW+T,RH,T,wmat(2*RW),0,RH/2,-RD,g);box(T,RH,2*RD+T,wmat(2*RD),-RW,RH/2,0,g);box(T,RH,2*RD+T,wmat(2*RD),RW,RH/2,0,g);
+ box(RW-2,RH,T,wmat(RW-2),-(2+RW)/2,RH/2,RD,g);box(RW-2,RH,T,wmat(RW-2),(2+RW)/2,RH/2,RD,g);
+ const lintel=box(4,RH-3.6,T,new THREE.MeshLambertMaterial({color:st.pillar}),0,3.6+(RH-3.6)/2,RD,g);
+ room.localCol=[[-RW-.3,RW+.3,-RD-.3,-RD+.3],[-RW-.3,-RW+.3,-RD-.3,RD+.3],[RW-.3,RW+.3,-RD-.3,RD+.3],[-RW-.3,-2,RD-.3,RD+.3],[2,RW+.3,RD-.3,RD+.3],[-0.75,0.75,0.85,2.35]];
+ const pm=new THREE.MeshLambertMaterial({color:st.pillar});const tm=new THREE.MeshLambertMaterial({color:st.trim});
+ [[-2.25,RD+.35],[2.25,RD+.35],[-RW-.1,RD+.1],[RW+.1,RD+.1],[-RW-.1,-RD-.1],[RW+.1,-RD-.1]].forEach(([x,z])=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.32,.38,RH+.4,10),pm);c.position.set(x,RH/2,z);c.castShadow=true;g.add(c);const cap=new THREE.Mesh(new THREE.CylinderGeometry(.48,.4,.3,10),tm);cap.position.set(x,RH+.35,z);g.add(cap);const b=new THREE.Mesh(new THREE.CylinderGeometry(.5,.55,.35,10),tm);b.position.set(x,.3,z);g.add(b);});
+ const plinth=box(2*RW+1.6,0.24,2*RD+1.6,new THREE.MeshLambertMaterial({color:0x8d8579}),0,0,0,g);plinth.castShadow=false;
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(2*RW-.2,2*RD-.2),new THREE.MeshLambertMaterial({map:floorTexture(room.style)}));fl.rotation.x=-Math.PI/2;fl.position.y=0.125;fl.receiveShadow=true;g.add(fl);
+ const rug=new THREE.Mesh(new THREE.CircleGeometry(2.6,40),new THREE.MeshLambertMaterial({color:room.color}));rug.rotation.x=-Math.PI/2;rug.position.set(0,0.13,1.6);g.add(rug);
+ const rug2=new THREE.Mesh(new THREE.RingGeometry(2.6,2.9,40),tm);rug2.rotation.x=-Math.PI/2;rug2.position.set(0,0.131,1.6);g.add(rug2);
+ // roof
+ const roofMat=(c,side)=>new THREE.MeshPhongMaterial({color:c,side:side?THREE.DoubleSide:THREE.FrontSide,flatShading:true,shininess:0});
+ const ry=RH+0.05;
+ if(room.style==='rotunda'){const d=new THREE.Mesh(new THREE.SphereGeometry(1,40,16,0,TAU,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0xd9b25a,metalness:.55,roughness:.35,side:THREE.DoubleSide}));d.scale.set(14.4,6.4,10.2);d.position.y=ry;d.castShadow=true;g.add(d);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(1,0.06,8,48),tm);ring.scale.set(14.4,10.2,1);ring.rotation.x=Math.PI/2;ring.position.y=ry+.1;g.add(ring);
+  const fin=new THREE.Mesh(new THREE.ConeGeometry(.4,2.4,8),tm);fin.position.y=ry+7.5;g.add(fin);const ball=new THREE.Mesh(new THREE.SphereGeometry(.55,16,10),tm);ball.position.y=ry+6.5;g.add(ball);}
+ else if(room.style==='gonjong'){const r=saddleRoof(2*RW+2,2*RD,4.2,4.6,3.5,roofMat(0x2b2620,true),0.55);r.position.y=ry;g.add(r);
+  [-1,1].forEach(s=>{const h=new THREE.Mesh(new THREE.ConeGeometry(.25,2.4,6),tm);h.position.set(s*(RW+1+3.5),ry+4.2+4.6+0.6,0);h.rotation.z=-s*0.5;g.add(h);});
+  const r2=saddleRoof(7,3,2.2,1.8,1.5,roofMat(0x2b2620,true),.5);r2.rotation.y=Math.PI/2;r2.position.set(0,ry+1.4,RD+0.3);r2.scale.set(1,1,0.6);g.add(r2);}
+ else if(room.style==='joglo'){const m=roofMat(0xa8553a);const a=frustum(RW+2.2,RD+2.2,1.8,0.62,m);a.position.y=ry+0.9;g.add(a);const b=frustum((RW+2.2)*0.62,(RD+2.2)*0.62,3.6,0.14,m);b.position.y=ry+1.8+1.8;g.add(b);
+  const crest=box(3.5,.25,.25,tm,0,ry+5.45,0,g);crest.castShadow=false;}
+ else if(room.style==='meru'){const m=roofMat(0x2a2622);let y=ry;[[RW+2,RD+2],[RW-1.5,RD-1.2],[RW-4.5,RD-3.6]].forEach(([hx,hz],k)=>{const f=frustum(hx,hz,1.7,0.5,m);f.position.y=y+0.85;g.add(f);y+=1.7;if(k<2){const n=box(hx*0.9,0.9,hz*0.9,new THREE.MeshLambertMaterial({color:st.pillar}),0,y+.45,0,g);n.castShadow=false;y+=0.9;}});
+  const fin=new THREE.Mesh(new THREE.ConeGeometry(.5,1.8,8),new THREE.MeshLambertMaterial({color:0xc9a44a}));fin.position.y=y+0.9;g.add(fin);}
+ else if(room.style==='betang'){const r=saddleRoof(2*RW+2.5,2*RD,3.6,0.7,0.5,roofMat(0x5a3e26,true),0);r.position.y=ry;g.add(r);
+  [-1,1].forEach(s=>{const h=new THREE.Mesh(new THREE.TorusGeometry(.8,.12,6,16,Math.PI*1.4),tm);h.position.set(s*(RW+1.6),ry+4.6,0);h.rotation.set(0,Math.PI/2,s>0?0:Math.PI);g.add(h);});}
+ else if(room.style==='tongkonan'){const r=saddleRoof(2*RW+1,2*RD,3.2,5.4,5.5,roofMat(0x2e2420,true),0.65);r.position.y=ry;g.add(r);
+  const gable=new THREE.Mesh(new THREE.CircleGeometry(1.2,24),new THREE.MeshLambertMaterial({color:0xc33a26,side:THREE.DoubleSide}));gable.position.set(0,ry+1.6,RD+1.2);g.add(gable);
+  [-1,1].forEach(s=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,ry+8,8),pm);p.position.set(s*(RW+4.5),(ry+8)/2,0);p.castShadow=true;g.add(p);});}
+ else if(room.style==='honai'){const d=new THREE.Mesh(new THREE.SphereGeometry(1,14,6,0,TAU,0,Math.PI/2),roofMat(0xa98249,true));d.scale.set(14.6,7.4,10.4);d.position.y=ry-0.3;d.castShadow=true;g.add(d);
+  const top=new THREE.Mesh(new THREE.ConeGeometry(1.3,2.2,10),roofMat(0x8e6a37));top.position.y=ry+7.6;g.add(top);
+  const band=new THREE.Mesh(new THREE.TorusGeometry(1,.05,6,40),new THREE.MeshLambertMaterial({color:0xb23324}));band.scale.set(14.4,10.2,1);band.rotation.x=Math.PI/2;band.position.y=ry+.3;g.add(band);}
+ // door sign
+ const sign=new THREE.Mesh(new THREE.PlaneGeometry(6.2,1.16),new THREE.MeshBasicMaterial({map:signTexture(room.name.replace('Bilik ','').toUpperCase(),room.arch+' · '+room.fauna.length+' fauna',room.color),toneMapped:false}));
+ sign.position.set(0,4.4,RD+0.22);g.add(sign);
+ // gem badge above door (lights when earned)
+ const badge=new THREE.Mesh(new THREE.OctahedronGeometry(0.35),new THREE.MeshStandardMaterial({color:room.color,emissive:room.color,emissiveIntensity:0.15,metalness:.3,roughness:.3}));badge.position.set(0,RH+0.7,RD+0.4);g.add(badge);room.badge=badge;
+ // altar
+ const stone=new THREE.MeshLambertMaterial({color:0x9a9284});const al=new THREE.Group();al.position.set(0,0,1.6);g.add(al);
+ const b1=new THREE.Mesh(new THREE.CylinderGeometry(.75,.9,.35,8),stone);b1.position.y=.3;const b2=new THREE.Mesh(new THREE.CylinderGeometry(.45,.6,.8,8),stone);b2.position.y=.85;const b3=new THREE.Mesh(new THREE.CylinderGeometry(.8,.55,.22,8),tm);b3.position.y=1.35;
+ [b1,b2,b3].forEach(m=>{m.castShadow=true;al.add(m);});
+ const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.42),new THREE.MeshStandardMaterial({color:room.color,emissive:room.color,emissiveIntensity:.7,metalness:.2,roughness:.15}));gem.position.y=2.05;al.add(gem);
+ const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:room.color,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));glow.scale.set(2.6,2.6,1);glow.position.y=2.05;al.add(glow);
+ const qLabel=textSprite('KUIS','#ffe9a8',64);qLabel.scale.set(3,.75,1);qLabel.position.y=3.05;al.add(qLabel);
+ const [ax,az]=toWorld(room,0,1.6);
+ const altarIa={type:'quiz',room,pos:new THREE.Vector3(ax,1.4,az),range:3.4,label:'Mulai kuis '+room.short,highlight(on){glow.scale.setScalar(on?3.4:2.6);}};
+ interactables.push(altarIa);gem.userData.ia=altarIa;b2.userData.ia=altarIa;b3.userData.ia=altarIa;pickables.push(gem,b2,b3);altars.push({room,gem,glow,qLabel});
+ // hanging lantern
+ const lan=new THREE.Mesh(new THREE.CylinderGeometry(.35,.25,.6,8),new THREE.MeshBasicMaterial({color:0xffd27a}));lan.position.set(0,RH-0.6,-2);g.add(lan);
+ // frames
+ const wood=new THREE.MeshLambertMaterial({color:0x3a2414});
+ frameSlots(room.fauna.length).forEach((sl,k)=>{const f=room.fauna[k];const fg=new THREE.Group();fg.position.set(sl.lx,0,sl.lz);fg.rotation.y=sl.ry;g.add(fg);
+  const bm=new THREE.MeshStandardMaterial({color:room.color,emissive:room.color,emissiveIntensity:0,metalness:.4,roughness:.4});
+  const border=new THREE.Mesh(new THREE.BoxGeometry(3.66,2.18,0.1),bm);border.position.set(0,2.75,0.02);fg.add(border);
+  const back=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.02,0.12),wood);back.position.set(0,2.75,0.04);fg.add(back);
+  const pic=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.8),new THREE.MeshBasicMaterial({map:photo(f.id),toneMapped:false}));pic.position.set(0,2.75,0.11);fg.add(pic);
+  const plate=new THREE.Mesh(new THREE.PlaneGeometry(2.6,0.57),new THREE.MeshBasicMaterial({map:plateTexture(f.prov,f.name,room.color,!!S.seen[f.id]),toneMapped:false,transparent:true}));plate.position.set(0,1.28,0.08);fg.add(plate);
+  const spot=new THREE.Mesh(new THREE.PlaneGeometry(4.4,3.6),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff1c8,transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false}));spot.position.set(0,2.6,0.005);fg.add(spot);
+  const [wx,wz]=toWorld(room,sl.lx+Math.sin(sl.ry)*1.2,sl.lz+Math.cos(sl.ry)*1.2);
+  const ia={type:'fauna',fauna:f,room,pos:new THREE.Vector3(wx,2,wz),range:4.4,label:'Lihat '+f.name,highlight(on){bm.emissiveIntensity=on?0.9:0;}};
+  interactables.push(ia);pic.userData.ia=ia;plate.userData.ia=ia;border.userData.ia=ia;pickables.push(pic,plate,border);frames.push({f,plate,room});});
+ // stone path to the ring
+ const [px,pz]=toWorld(room,0,RD+4.5);const path=new THREE.Mesh(new THREE.PlaneGeometry(3.4,R_ROOM-RD-PATH_R+1),new THREE.MeshLambertMaterial({color:0xa38f66}));path.rotation.x=-Math.PI/2;path.rotation.z=room.a;
+ const mid=(R_ROOM-RD+PATH_R)/2;path.position.set(-mid*Math.sin(phi),0.03,mid*Math.cos(phi));path.receiveShadow=true;scene.add(path);
+ room.door=toWorld(room,0,RD+3);room.label=textSprite(room.short,'#ffffff',58);
+}
+function updatePlate(f){const fr=frames.filter(x=>x.f.id===f.id);fr.forEach(x=>{x.plate.material.map.dispose();x.plate.material.map=plateTexture(f.prov,f.name,x.room.color,true);x.plate.material.needsUpdate=true;});}
+
+/* =====================================================================
+   8. PLAZA, NPC, ISLAND & TREASURE
+   ===================================================================== */
+const lanternMat=new THREE.SpriteMaterial({map:glowTex,color:0xffb347,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false});
+const flames=[];
+let npc,barrier,barrierU,chest,crown,chestLight,beams=[],pedGems=[],islandGlow;
+function buildPlaza(){
+ // ring path stones (torches)
+ const pole=new THREE.MeshLambertMaterial({color:0x8c7a4a});
+ for(let i=0;i<20;i++){const a=i/20*TAU;const x=Math.cos(a)*(PATH_R+2.3),z=Math.sin(a)*(PATH_R+2.3);if(Math.abs(x)<4&&z>0)continue;const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,2.2,6),pole);p.position.set(x,1.1,z);scene.add(p);
+  const bowl=new THREE.Mesh(new THREE.CylinderGeometry(.18,.1,.2,8),new THREE.MeshLambertMaterial({color:0x3a2a1a}));bowl.position.set(x,2.25,z);scene.add(bowl);
+  const fl=new THREE.Sprite(lanternMat);fl.position.set(x,2.55,z);fl.scale.set(1.3,1.6,1);scene.add(fl);flames.push(fl);
+  const core=new THREE.Mesh(new THREE.ConeGeometry(.09,.3,6),new THREE.MeshBasicMaterial({color:0xffd27a}));core.position.set(x,2.45,z);scene.add(core);}
+ // path from plaza to bridge
+ const pth=new THREE.Mesh(new THREE.PlaneGeometry(3.4,40),new THREE.MeshLambertMaterial({color:0xa38f66}));pth.rotation.x=-Math.PI/2;pth.position.set(0,0.03,LAKE_R+2+20);pth.receiveShadow=true;scene.add(pth);
+ const plaza=new THREE.Mesh(new THREE.CircleGeometry(11,48),new THREE.MeshLambertMaterial({color:0x9e8a62}));plaza.rotation.x=-Math.PI/2;plaza.position.set(0,0.035,56);plaza.receiveShadow=true;scene.add(plaza);
+ const plazaRing=new THREE.Mesh(new THREE.RingGeometry(10.6,11,48),new THREE.MeshLambertMaterial({color:0x8e7650}));plazaRing.rotation.x=-Math.PI/2;plazaRing.position.set(0,0.04,56);scene.add(plazaRing);
+ // candi bentar (split gate)
+ const brick=new THREE.MeshLambertMaterial({color:0xa4492f}),stoneM=new THREE.MeshLambertMaterial({color:0xa99c80});
+ [-1,1].forEach(s=>{let y=0;for(let j=0;j<8;j++){const w=3.2-j*0.34,h=j===0?1.2:0.85;box(w,h,2.6-j*0.12,j%2?stoneM:brick,s*(2+w/2),y+h/2,50);y+=h;}
+  const top=new THREE.Mesh(new THREE.ConeGeometry(.35,1.1,4),stoneM);top.position.set(s*2.4,y+.55,50);scene.add(top);colliders.push({x0:s>0?2:-5.3,x1:s>0?5.3:-2,z0:48.6,z1:51.4});});
+ const welcome=textSprite('RIMBA NUSANTARA','#ffe9a8',50);welcome.position.set(0,8.3,50);welcome.scale.set(11,2.75,1);scene.add(welcome);
+ // info boards
+ const bw=new THREE.MeshLambertMaterial({color:0x4a2f1a});
+ [[-8.6,57.5,0.95],[8.6,57.5,-0.95],[-6.8,44.5,0.55]].forEach(([x,z,ry],k)=>{const b=BOARDS[k];const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
+  [-1.95,1.95].forEach(px=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.2,3.8,.2),bw);p.position.set(px,1.9,-.05);p.castShadow=true;g.add(p);});
+  const fr=new THREE.Mesh(new THREE.BoxGeometry(4.1,2.45,.14),new THREE.MeshStandardMaterial({color:0xe9b949,emissive:0xe9b949,emissiveIntensity:0,metalness:.4,roughness:.5}));fr.position.set(0,2.6,0);g.add(fr);
+  const pic=new THREE.Mesh(new THREE.PlaneGeometry(3.85,2.17),new THREE.MeshBasicMaterial({map:photo(b.id),toneMapped:false}));pic.position.set(0,2.6,.08);g.add(pic);
+  const lbl=new THREE.Mesh(new THREE.PlaneGeometry(3.6,.5),new THREE.MeshBasicMaterial({map:plateTexture('Papan Peta',b.title.length>24?b.title.slice(0,24)+'…':b.title,'#e9b949',false),toneMapped:false,transparent:true}));lbl.position.set(0,1.05,.05);g.add(lbl);
+  const wpos=new THREE.Vector3(x+Math.sin(ry)*1.5,2,z+Math.cos(ry)*1.5);const ia={type:'board',board:b,pos:wpos,range:4.6,label:'Baca papan: '+b.title,highlight(on){fr.material.emissiveIntensity=on?.8:0;}};
+  interactables.push(ia);pic.userData.ia=ia;fr.userData.ia=ia;pickables.push(pic,fr);colliders.push({x0:x-1.2,x1:x+1.2,z0:z-1.2,z1:z+1.2});});
+ // NPC: Kak Rangkong (hornbill guide)
+ npc=new THREE.Group();const blk=new THREE.MeshStandardMaterial({color:0x1d1d22,roughness:.6}),wht=new THREE.MeshLambertMaterial({color:0xf3efe4}),ylw=new THREE.MeshStandardMaterial({color:0xf2b230,roughness:.4}),red=new THREE.MeshStandardMaterial({color:0xd8401e,roughness:.4});
+ const body=new THREE.Mesh(new THREE.SphereGeometry(.55,20,14),blk);body.scale.set(1,1.15,1.5);npc.add(body);
+ const belly=new THREE.Mesh(new THREE.SphereGeometry(.4,16,10),wht);belly.position.set(0,-.25,.25);belly.scale.set(1,.8,1.2);npc.add(belly);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.35,18,12),blk);head.position.set(0,.55,.65);npc.add(head);
+ const beak=new THREE.Mesh(new THREE.ConeGeometry(.17,1.05,12),ylw);beak.rotation.x=Math.PI/2+0.25;beak.position.set(0,.43,1.4);npc.add(beak);
+ const casque=new THREE.Mesh(new THREE.CylinderGeometry(.11,.14,.75,10),red);casque.rotation.x=Math.PI/2+0.05;casque.position.set(0,.72,1.12);npc.add(casque);
+ [-1,1].forEach(s=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),new THREE.MeshBasicMaterial({color:0xffffff}));e.position.set(s*.25,.65,.85);npc.add(e);const pu=new THREE.Mesh(new THREE.SphereGeometry(.04,8,6),new THREE.MeshBasicMaterial({color:0x000000}));pu.position.set(s*.29,.66,.89);npc.add(pu);});
+ const tail=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,1.2),wht);tail.position.set(0,-.05,-1.1);tail.rotation.x=-.3;npc.add(tail);
+ npc.userData.wings=[-1,1].map(s=>{const w=new THREE.Mesh(new THREE.BoxGeometry(1.3,.06,.8),blk);w.geometry.translate(s*.65,0,0);w.position.set(s*.45,.15,0);npc.add(w);return w;});
+ npc.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+ npc.position.set(4.6,2.6,46.5);scene.add(npc);
+ const bubble=textSprite('Tanya aku!','#ffe9a8',46);bubble.scale.set(4,1,1);bubble.position.set(0,1.7,0);npc.add(bubble);npc.userData.bubble=bubble;
+ const npcIa={type:'npc',pos:new THREE.Vector3(4.6,1.5,46.5),range:4.5,label:'Bicara dengan Kak Rangkong',highlight(){}};interactables.push(npcIa);body.userData.ia=npcIa;head.userData.ia=npcIa;beak.userData.ia=npcIa;pickables.push(body,head,beak);
+ // bridge
+ const plank=new THREE.MeshLambertMaterial({color:0x8a6a44});const deckLen=LAKE_R+3.5-(ISLAND_R-0.8);const deckZ=(ISLAND_R-0.8+LAKE_R+3.5)/2;
+ for(let z=ISLAND_R-0.8;z<LAKE_R+3.5;z+=0.55){const p=box(3.2,0.12,0.48,plank,0,0.02,z+0.27);p.castShadow=false;}
+ [-1.55,1.55].forEach(x=>{for(let z=ISLAND_R;z<LAKE_R+3.5;z+=2.6){const p=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,2.4,6),plank);p.position.set(x,0,z);scene.add(p);}
+  const rail=box(.1,.1,deckLen,plank,x,1.05,deckZ);rail.castShadow=false;});
+ // island
+ const isl=new THREE.Mesh(new THREE.CylinderGeometry(ISLAND_R,ISLAND_R+.6,1.6,48),new THREE.MeshLambertMaterial({color:0x9a917e}));isl.position.y=-0.72;isl.receiveShadow=true;scene.add(isl);
+ const top=new THREE.Mesh(new THREE.CircleGeometry(ISLAND_R-0.05,48),new THREE.MeshLambertMaterial({color:0xcfc3a3}));top.rotation.x=-Math.PI/2;top.position.y=0.09;top.receiveShadow=true;scene.add(top);
+ const rim=new THREE.Mesh(new THREE.TorusGeometry(ISLAND_R-.1,.12,6,64),new THREE.MeshLambertMaterial({color:0xb8862f}));rim.rotation.x=Math.PI/2;rim.position.y=0.12;scene.add(rim);
+ // stupa (Borobudur-like)
+ const sm=new THREE.MeshLambertMaterial({color:0x8f8a80}),sm2=new THREE.MeshLambertMaterial({color:0x7b766d});const SZ=-0.9;
+ [[5.4,.5],[4.2,.5],[3.0,.5]].forEach(([s,h],k)=>{const b=box(s,h,s,k%2?sm2:sm,0,0.1+h/2+k*h,SZ);});
+ const prof=[[0,0],[1.35,0],[1.45,.25],[1.5,.9],[1.38,1.6],[1.05,2.15],[.55,2.5],[.38,2.6],[0,2.6]].map(([x,y])=>new THREE.Vector2(x,y));
+ const bell=new THREE.Mesh(new THREE.LatheGeometry(prof,28),sm);bell.position.set(0,1.6,SZ);bell.castShadow=true;scene.add(bell);
+ const spire=new THREE.Mesh(new THREE.ConeGeometry(.28,1.8,8),new THREE.MeshStandardMaterial({color:0xd9b25a,metalness:.6,roughness:.3}));spire.position.set(0,5.1,SZ);scene.add(spire);
+ const mini=new THREE.LatheGeometry(prof.map(v=>v.clone().multiplyScalar(.3)),12);
+ for(let k=0;k<8;k++){const a=k/8*TAU+Math.PI/8;const m=new THREE.Mesh(mini,sm2);m.position.set(Math.cos(a)*2.35,.6,SZ+Math.sin(a)*2.35);scene.add(m);}
+ colliders.push({x0:-2.9,x1:2.9,z0:SZ-2.9,z1:SZ+2.9});
+ // gem pedestals
+ ROOMS.forEach((r,i)=>{const phi=(i+1)*Math.PI/4;const x=-5.6*Math.sin(phi),z=5.6*Math.cos(phi);const p=new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,1.1,8),sm);p.position.set(x,.65,z);p.castShadow=true;scene.add(p);
+  const gm=new THREE.Mesh(new THREE.OctahedronGeometry(.3),new THREE.MeshStandardMaterial({color:0x333333,emissive:r.color,emissiveIntensity:0,metalness:.3,roughness:.3}));gm.position.set(x,1.65,z);scene.add(gm);
+  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:r.color,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));gl.scale.set(2,2,1);gl.position.set(x,1.65,z);scene.add(gl);
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.12,.3,40,8,1,true),new THREE.MeshBasicMaterial({color:r.color,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));beam.position.set(x,21,z);scene.add(beam);beams.push(beam);
+  pedGems.push({gm,gl,room:r});colliders.push({x0:x-.5,x1:x+.5,z0:z-.5,z1:z+.5});});
+ // chest
+ chest=new THREE.Group();chest.position.set(0,0.1,3.4);scene.add(chest);
+ const cw=new THREE.MeshStandardMaterial({color:0x6b3d1d,roughness:.7}),cg=new THREE.MeshStandardMaterial({color:0xe2b04a,metalness:.8,roughness:.3});
+ const cb=new THREE.Mesh(new THREE.BoxGeometry(1.6,.85,1),cw);cb.position.y=.43;cb.castShadow=true;chest.add(cb);
+ [-.62,.62].forEach(x=>{const t=new THREE.Mesh(new THREE.BoxGeometry(.12,.9,1.04),cg);t.position.set(x,.44,0);chest.add(t);});
+ const lid=new THREE.Group();lid.position.set(0,.85,-.5);chest.add(lid);
+ const lg=new THREE.CylinderGeometry(.5,.5,1.6,20,1,false,0,Math.PI);lg.rotateZ(Math.PI/2);const lm=new THREE.Mesh(lg,cw);lm.position.set(0,0,.5);lm.castShadow=true;lid.add(lm);
+ [-.62,.62].forEach(x=>{const t=new THREE.Mesh(new THREE.TorusGeometry(.5,.05,6,20,Math.PI),cg);t.rotation.y=Math.PI/2;t.position.set(x,0,.5);lid.add(t);});
+ const lock=new THREE.Mesh(new THREE.BoxGeometry(.25,.3,.08),cg);lock.position.set(0,.65,.52);chest.add(lock);
+ chest.userData.lid=lid;colliders.push({x0:-1,x1:1,z0:2.8,z1:4});
+ chestLight=new THREE.PointLight(0xffc860,0,16,2);chestLight.position.set(0,2.2,3.4);scene.add(chestLight);
+ islandGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffd36b,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));islandGlow.position.set(0,1.4,3.4);islandGlow.scale.set(5,5,1);scene.add(islandGlow);
+ crown=new THREE.Group();const cr=new THREE.Mesh(new THREE.CylinderGeometry(.42,.38,.3,24,1,true),new THREE.MeshStandardMaterial({color:0xf2c24f,metalness:.9,roughness:.2,side:THREE.DoubleSide}));crown.add(cr);
+ for(let k=0;k<8;k++){const a=k/8*TAU;const sp=new THREE.Mesh(new THREE.ConeGeometry(.08,.3,6),cr.material);sp.position.set(Math.cos(a)*.4,.28,Math.sin(a)*.4);crown.add(sp);const gm=new THREE.Mesh(new THREE.OctahedronGeometry(.06),new THREE.MeshBasicMaterial({color:ROOMS[k%7].color}));gm.position.set(Math.cos(a)*.43,0,Math.sin(a)*.43);crown.add(gm);}
+ crown.position.set(0,.5,3.4);crown.visible=false;scene.add(crown);
+ const chestIa={type:'chest',pos:new THREE.Vector3(0,1,3.4),range:3.4,label:'Buka Harta Karun',highlight(){}};interactables.push(chestIa);cb.userData.ia=chestIa;lm.userData.ia=chestIa;pickables.push(cb,lm);
+ // magical barrier
+ barrierU={uTime:{value:0},uOp:{value:1}};
+ barrier=new THREE.Mesh(new THREE.SphereGeometry(ISLAND_R+0.4,48,24,0,TAU,0,Math.PI/2),new THREE.ShaderMaterial({uniforms:barrierU,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,
+  vertexShader:'varying vec3 vN,vW;varying vec2 vU;void main(){vU=uv;vN=normalize(mat3(modelMatrix)*normal);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
+  fragmentShader:'uniform float uTime,uOp;varying vec3 vN,vW;varying vec2 vU;void main(){vec3 v=normalize(cameraPosition-vW);float fr=pow(1.-abs(dot(v,vN)),2.5);float hx=abs(sin(vU.x*120.))*abs(sin(vU.y*50.+uTime*.6));float band=smoothstep(.95,1.,sin(vU.y*18.-uTime*2.));float a=(fr*.7+pow(hx,8.)*.25+band*.25)*uOp;gl_FragColor=vec4(mix(vec3(.95,.75,.3),vec3(.4,.85,1.),vU.y)*a,a);}'}));
+ barrier.position.y=0.1;scene.add(barrier);
+ const barIa={type:'barrier',pos:new THREE.Vector3(0,1,ISLAND_R+2.2),range:3.2,label:'Penghalang gaib Pulau Candi',highlight(){}};interactables.push(barIa);
+}
+
+/* =====================================================================
+   9. PLAYER & CONTROLS
+   ===================================================================== */
+const player={x:0,z:62,yaw:0,pitch:-0.04,vx:0,vz:0,bob:0};
+let playing=false,modalOpen=false,cinematic=null,currentRoom=null,focus=null;
+const keys={};
+function isUnlocked(){return gemCount()>=ROOMS.length;}
+function allowed(x,z){const r=Math.hypot(x,z);if(r>WORLD_R)return false;
+ const onBridge=Math.abs(x)<1.45&&z>ISLAND_R-1.2&&z<LAKE_R+3.6;
+ if(r<LAKE_R+1.2){if(onBridge){if(!isUnlocked()&&z<ISLAND_R+1.6)return false;return true;}if(r<ISLAND_R-0.45&&isUnlocked())return true;return false;}
+ return true;}
+function collide(x,z){const pr=0.42;
+ for(const c of colliders){if(x>c.x0-pr&&x<c.x1+pr&&z>c.z0-pr&&z<c.z1+pr){const dl=x-(c.x0-pr),dr=(c.x1+pr)-x,dt=z-(c.z0-pr),db=(c.z1+pr)-z;const m=Math.min(dl,dr,dt,db);if(m===dl)x=c.x0-pr;else if(m===dr)x=c.x1+pr;else if(m===dt)z=c.z0-pr;else z=c.z1+pr;}}
+ for(const r of ROOMS){if(Math.abs(x-r.cx)>15||Math.abs(z-r.cz)>15)continue;let[lx,lz]=toLocal(r,x,z);
+  for(const[x0,x1,z0,z1] of r.localCol){if(lx>x0-pr&&lx<x1+pr&&lz>z0-pr&&lz<z1+pr){const dl=lx-(x0-pr),dr=(x1+pr)-lx,dt=lz-(z0-pr),db=(z1+pr)-lz;const m=Math.min(dl,dr,dt,db);if(m===dl)lx=x0-pr;else if(m===dr)lx=x1+pr;else if(m===dt)lz=z0-pr;else lz=z1+pr;}}
+  [x,z]=toWorld(r,lx,lz);}
+ return[x,z];}
+function eyeY(x,z){const onBridge=Math.abs(x)<1.6&&z>ISLAND_R-1.2&&z<LAKE_R+3.6;if(onBridge||Math.hypot(x,z)<ISLAND_R)return 0.12+1.7;
+ const r=roomAt(x,z);if(r)return 0.125+1.7;return Math.max(groundH(x,z),-0.6)+1.7;}
+function roomAt(x,z){for(const r of ROOMS){const[lx,lz]=toLocal(r,x,z);if(Math.abs(lx)<RW-.1&&lz>-RD+.1&&lz<RD+.1)return r;}return null;}
+const fwd=()=>({x:-Math.sin(player.yaw),z:-Math.cos(player.yaw)});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+ if(k==='escape'){if(modalOpen)closeModal();else if(!$('chat').hidden){closeChat();}return;}
+ if(e.target.tagName==='INPUT')return;
+ if(!playing||cinematic)return;
+ if(modalOpen){if(quiz&&!quiz.done&&!quiz.answered&&['1','2','3','4'].includes(k)){const b=document.querySelectorAll('.opt')[+k-1];if(b)b.click();}else if(quiz&&(k==='enter'||k===' ')&&quiz.answered){const n=$('qNext');if(n){e.preventDefault();n.click();}}return;}
+ keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+ if(k==='e'||k==='enter'){if(focus)interact(focus);}else if(k==='m')openMap();else if(k==='p')openAlbum();else if(k==='h')openHelp();else if(k==='t')openChat();else if(k==='n')cycleTime();else if(k==='k')openScores();});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
+// pointer: drag-look, click-pick, touch joystick
+const ptr={};let joy={id:null,x:0,y:0,dx:0,dy:0};
+const isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window&&navigator.maxTouchPoints>0);
+if(isTouch)document.body.classList.add('touch');
+canvas.addEventListener('pointerdown',e=>{if(!playing||modalOpen||cinematic)return;canvas.focus();
+ if(e.pointerType==='touch'&&e.clientX<innerWidth*0.42&&e.clientY>innerHeight*0.35&&joy.id===null){joy={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0,dy:0};const j=$('joy');j.style.left=(e.clientX-60)+'px';j.style.top=(e.clientY-60)+'px';j.style.bottom='auto';return;}
+ ptr[e.pointerId]={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,moved:0};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(joy.id===e.pointerId){let dx=e.clientX-joy.x,dy=e.clientY-joy.y;const l=Math.hypot(dx,dy);if(l>50){dx*=50/l;dy*=50/l;}joy.dx=dx/50;joy.dy=dy/50;$('joy').firstElementChild.style.transform=`translate(${dx}px,${dy}px)`;return;}
+ const p=ptr[e.pointerId];if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;p.moved+=Math.abs(dx)+Math.abs(dy);
+ const sens=e.pointerType==='touch'?0.006:0.0038;player.yaw-=dx*sens;player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch-dy*sens));});
+const endPtr=e=>{if(joy.id===e.pointerId){joy={id:null,x:0,y:0,dx:0,dy:0};const j=$('joy');j.firstElementChild.style.transform='';j.style.left='';j.style.top='';j.style.bottom='';return;}
+ const p=ptr[e.pointerId];if(!p)return;delete ptr[e.pointerId];if(p.moved<8&&e.type==='pointerup')pick(e.clientX,e.clientY);};
+canvas.addEventListener('pointerup',endPtr);canvas.addEventListener('pointercancel',endPtr);
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+function pick(cx,cy){if(!playing||modalOpen)return;ndc.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);ray.setFromCamera(ndc,camera);ray.far=16;const hit=ray.intersectObjects(pickables,false)[0];if(hit&&hit.object.userData.ia)interact(hit.object.userData.ia);}
+$('actBtn').addEventListener('click',()=>{if(focus)interact(focus);});
+$('prompt').addEventListener('click',()=>{if(focus)interact(focus);});
+
+function teleport(x,z,yaw){player.x=x;player.z=z;if(yaw!==undefined)player.yaw=yaw;player.pitch=-0.05;}
+function stepPlayer(dt){
+ let mx=0,mz=0;const f=fwd(),rt={x:Math.cos(player.yaw),z:-Math.sin(player.yaw)};
+ const fw=(keys['w']||keys['arrowup']?1:0)-(keys['s']||keys['arrowdown']?1:0)-joy.dy;const sd=(keys['d']?1:0)-(keys['a']?1:0)+joy.dx;
+ if(keys['arrowleft'])player.yaw+=dt*2;if(keys['arrowright'])player.yaw-=dt*2;
+ mx=f.x*fw+rt.x*sd;mz=f.z*fw+rt.z*sd;const l=Math.hypot(mx,mz);if(l>1){mx/=l;mz/=l;}
+ const sp=(keys['shift']?10.5:5.6)*(l>0.05?1:0);const k=1-Math.exp(-dt*10);player.vx+=(mx*sp-player.vx)*k;player.vz+=(mz*sp-player.vz)*k;
+ let nx=player.x+player.vx*dt,nz=player.z+player.vz*dt;
+ if(!allowed(nx,nz)){if(allowed(nx,player.z))nz=player.z;else if(allowed(player.x,nz))nx=player.x;else{nx=player.x;nz=player.z;}}
+ [nx,nz]=collide(nx,nz);if(!allowed(nx,nz)){nx=player.x;nz=player.z;}
+ const moved=Math.hypot(nx-player.x,nz-player.z);player.x=nx;player.z=nz;player.bob+=moved*1.9;
+ const ey=eyeY(player.x,player.z);camera.position.set(player.x,ey+Math.sin(player.bob)*0.045,player.z);camera.rotation.set(player.pitch,player.yaw,0);
+ if(A.water&&A.ctx){const d=Math.abs(Math.hypot(player.x,player.z)-LAKE_R);A.water.gain.setTargetAtTime(Math.max(0,1-d/18)*0.05,A.ctx.currentTime,0.3);}
+}
+function updateFocus(){let best=null,bs=1e9;const f=fwd();
+ for(const ia of interactables){const dx=ia.pos.x-player.x,dz=ia.pos.z-player.z;const d=Math.hypot(dx,dz);if(d>ia.range)continue;const dot=(dx*f.x+dz*f.z)/(d||1);if(d>1.3&&dot<0.3)continue;
+  if(ia.type==='fauna'||ia.type==='quiz'){const r=roomAt(player.x,player.z);if(r!==ia.room)continue;}
+  if(ia.type==='chest'&&!isUnlocked())continue;if(ia.type==='barrier'&&isUnlocked())continue;
+  const sc=d-dot*1.6;if(sc<bs){bs=sc;best=ia;}}
+ if(best!==focus){if(focus&&focus.highlight)focus.highlight(false);focus=best;if(focus&&focus.highlight)focus.highlight(true);
+  const pr=$('prompt');if(focus){let lbl=focus.label;if(focus.type==='fauna'&&S.seen[focus.fauna.id])lbl+=' (sudah dikenali)';if(focus.type==='quiz'&&S.gems[focus.room.id])lbl='Ulangi kuis '+focus.room.short;if(focus.type==='chest'&&S.opened)lbl='Lihat piagam';
+   pr.innerHTML='<kbd>E</kbd><span></span>';pr.lastChild.textContent=lbl;pr.hidden=false;$('actBtn').style.display=isTouch?'block':'none';}else{pr.hidden=true;$('actBtn').style.display='none';}}}
+
+/* =====================================================================
+   10. UI
+   ===================================================================== */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(html,ms){const t=document.createElement('div');t.className='toast card';t.innerHTML=html;$('toasts').appendChild(t);while($('toasts').children.length>3)$('toasts').firstChild.remove();setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),400);},ms||3600);}
+function addPoints(n,why){S.points+=n;save();renderHud();if(why)toast(`<b>+${n} poin</b> <span>${esc(why)}</span>`,2600);}
+function renderHud(){$('who').textContent=S.name||'Penjelajah';$('pts').textContent=S.points;
+ $('gems').innerHTML=ROOMS.map(r=>`<i class="gem${S.gems[r.id]?' on':''}" style="--c:${r.color}" title="${esc(r.name)}${S.gems[r.id]?' · permata diraih':''}"></i>`).join('');
+ $('missionText').textContent=missionText();renderRank();
+ $('tSound').classList.toggle('off',!S.sound);$('tVoice').classList.toggle('off',!S.voice);$('timeTip').textContent='Waktu: '+PRESETS[S.time].name+' (N)';}
+function nextRoom(){return ROOMS.find(r=>!S.gems[r.id]);}
+function missionText(){if(S.opened)return'Harta karun terbuka. Jelajahi lagi atau lengkapi Paspor Fauna.';const n=nextRoom();if(!n)return'Tujuh permata lengkap! Seberangi jembatan ke Pulau Candi.';
+ return`Permata ${gemCount()}/7 · berikutnya ${n.name} (arah ${n.dir}).`;}
+function missionTarget(){const n=nextRoom();if(!n||S.opened)return[0,3.4];const r=roomAt(player.x,player.z);if(r===n){const[ax,az]=toWorld(n,0,1.6);return[ax,az];}return n.door;}
+let lastBanner=0;
+function banner(ey,title,sub){$('bEy').textContent=ey;$('bTitle').textContent=title;$('bSub').textContent=sub||'';const b=$('banner');b.classList.add('show');clearTimeout(lastBanner);lastBanner=setTimeout(()=>b.classList.remove('show'),3800);}
+let quiz=null;
+function openModal(html,color){quiz=null;scoresOpen=false;$('chat').hidden=true;$('sheet').style.setProperty('--c',color||'#e9b949');$('sheet').innerHTML=html;$('overlay').hidden=false;modalOpen=true;for(const k in keys)keys[k]=false;$('sheet').scrollTop=0;
+ const x=$('sheet').querySelector('.x');if(x){x.onclick=closeModal;setTimeout(()=>x.focus(),50);}}
+function closeModal(){$('overlay').hidden=true;modalOpen=false;quiz=null;scoresOpen=false;try{speechSynthesis.cancel();}catch(e){}canvas.focus();}
+$('overlay').addEventListener('pointerdown',e=>{if(e.target===$('overlay'))closeModal();});
+const X='<button class="x" aria-label="Tutup">×</button>';
+
+function interact(ia){A.sfx('click');
+ if(ia.type==='fauna')openFauna(ia.fauna);
+ else if(ia.type==='quiz')startQuiz(ia.room);
+ else if(ia.type==='board')openBoard(ia.board);
+ else if(ia.type==='npc')openChat();
+ else if(ia.type==='barrier'){toast(`Penghalang gaib masih aktif. Kumpulkan <b>${7-gemCount()} permata lagi</b> dari altar kuis di setiap bilik.`,4200);speak('Penghalang gaib masih aktif. Kumpulkan '+(7-gemCount())+' permata lagi.');}
+ else if(ia.type==='chest'){if(S.opened)openCert();else openTreasure();}}
+
+function openFauna(f){const r=f.room;const list=r.fauna;const i=list.indexOf(f);const isNew=!S.seen[f.id];
+ openModal(`${X}<div class="body"><div class="fauna"><img src="img/${f.id}.jpg" alt="${esc(f.name)} dari film"><div>
+  <div class="eyebrow">${esc(f.prov)}</div><h3>${esc(f.name)}</h3><p class="latin">${esc(f.latin)}</p>
+  <div class="chips"><span class="chip">${esc(r.name)}</span>${isNew?'<span class="chip gold">+5 poin · kartu baru</span>':'<span class="chip">Sudah di paspor</span>'}</div>
+  <p class="fact">${esc(f.fact)}</p>
+  <div class="row"><button class="btn small" id="say">Dengarkan</button></div></div></div>
+  <div class="navrow"><button class="btn small" id="prevF" ${i<=0?'disabled':''}>‹ ${i>0?esc(list[i-1].prov):'Awal'}</button><span class="chip">${i+1} / ${list.length}</span><button class="btn small" id="nextF" ${i>=list.length-1?'disabled':''}>${i<list.length-1?esc(list[i+1].prov):'Akhir'} ›</button></div></div>`,r.color);
+ $('say').onclick=()=>speak(`${f.prov}. ${f.name}. ${f.fact}`,true);
+ if(i>0)$('prevF').onclick=()=>openFauna(list[i-1]);if(i<list.length-1)$('nextF').onclick=()=>openFauna(list[i+1]);
+ if(isNew){S.seen[f.id]=1;A.sfx('seen');addPoints(5);updatePlate(f);checkAch();}
+ speak(f.ri===0?`${f.name}, ${f.prov} Indonesia.`:`${f.name}, fauna identitas ${f.prov}.`);}
+function openBoard(b){openModal(`${X}<div class="body"><div class="eyebrow">Papan Peta · Gapura</div><h3>${esc(b.title)}</h3><img src="img/${b.id}.jpg" alt="${esc(b.title)}" style="width:100%;border-radius:10px;border:1px solid var(--line);margin:6px 0 14px"><p style="line-height:1.65;margin:0">${esc(b.text)}</p></div>`);
+ if(!S.boards[b.id]){S.boards[b.id]=1;save();checkAch();}speak(b.text);}
+
+/* quiz */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startQuiz(room){const qs=shuffle(room.quiz).map(q=>({q,opts:shuffle(q.o.map((t,i)=>({t,ok:i===0})))}));
+ openModal(`${X}<div class="body" id="qbody"></div>`,room.color);quiz={room,qs,i:0,score:0,res:[],answered:false,done:false};renderQ();}
+function renderQ(){const Q=quiz,c=Q.qs[Q.i],r=Q.room;const f=c.q.img?ALL_FAUNA.find(x=>x.id===c.q.img):null;
+ $('qbody').innerHTML=`<div class="qhead"><div><div class="eyebrow">Altar ${esc(r.name)}</div><div style="font-size:13px;color:var(--ink-dim);margin-top:2px">Soal ${Q.i+1} dari ${Q.qs.length} · ${S.correct[c.q.id]?'sudah pernah benar':'+20 poin bila benar'}</div></div>
+  <div class="dots">${Q.qs.map((_,k)=>`<i class="${k<Q.i?(Q.res[k]?'ok':'no'):k===Q.i?'cur':''}"></i>`).join('')}</div></div>
+  ${f?`<img class="qimg" src="img/${f.id}.jpg" alt="Potongan gambar dari film">`:''}
+  <p class="qtext">${esc(c.q.q)}</p><div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="k">${'ABCD'[k]}</span><span>${esc(o.t)}</span></button>`).join('')}</div><div id="qfb"></div>`;
+ Q.answered=false;$('qbody').querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.k));}
+function answer(k){const Q=quiz;if(!Q||Q.answered)return;Q.answered=true;const c=Q.qs[Q.i];const ok=c.opts[k].ok;Q.res.push(ok);if(ok)Q.score++;
+ const bs=$('qbody').querySelectorAll('.opt');bs.forEach((b,j)=>{b.disabled=true;if(c.opts[j].ok)b.classList.add('ok');else if(j===k)b.classList.add('no');});
+ let pts='';if(ok&&!S.correct[c.q.id]){S.correct[c.q.id]=1;S.points+=20;save();renderHud();pts=' <b>+20 poin</b>';}
+ A.sfx(ok?'ok':'no');
+ $('qfb').innerHTML=`<div class="why"><b class="${ok?'ok':'no'}">${ok?'Benar!':'Belum tepat.'}</b>${pts} ${esc(c.q.why)}</div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary small" id="qNext">${Q.i<Q.qs.length-1?'Soal berikutnya':'Lihat hasil'}</button></div>`;
+ $('qNext').onclick=()=>{Q.i++;if(Q.i<Q.qs.length)renderQ();else quizResult();};$('qNext').focus();}
+function quizResult(){const Q=quiz;Q.done=true;const r=Q.room,n=Q.qs.length,need=Math.ceil(n*0.75);const pass=Q.score>=need;const had=!!S.gems[r.id];
+ if(pass&&!had){S.gems[r.id]=1;S.points+=50;save();renderHud();onGem(r);}
+ if(Q.score===n){S.ach.sempurnaPending=1;}
+ checkAch();
+ $('qbody').innerHTML=`<div class="result"><div class="eyebrow">Hasil kuis · ${esc(r.name)}</div><div class="biggem ${pass||had?'':'dim'}" style="--c:${r.color}"></div>
+  <div class="score num">${Q.score} / ${n}</div>
+  <p style="max-width:46ch;margin:8px auto 18px;line-height:1.6">${pass?(had?'Hebat, kamu tetap menguasai bilik ini.':`Permata ${esc(r.short)} menjadi milikmu! <b>+50 poin</b>. Permatanya kini menyala di Pulau Candi.`):`Butuh minimal ${need} jawaban benar untuk meraih permata. Lihat lagi gambar-gambar di dinding bilik, lalu coba lagi.`}</p>
+  <div class="row" style="justify-content:center"><button class="btn small" id="qRetry">Ulangi kuis</button><button class="btn primary small" id="qDone">${pass?'Lanjut menjelajah':'Pelajari bilik'}</button></div></div>`;
+ $('qRetry').onclick=()=>startQuiz(r);$('qDone').onclick=closeModal;
+ if(pass&&!had)speak(`Selamat! Permata ${r.short} menjadi milikmu.`);}
+function onGem(r){A.sfx('gem');const left=7-gemCount();
+ setTimeout(()=>{if(left>0)toast(`Permata <b>${esc(r.short)}</b> diraih. Tinggal <b>${left}</b> lagi.`,4200);else{toast('<b>Tujuh permata lengkap!</b> Penghalang gaib Pulau Candi lenyap. Seberangi jembatan.',6000);speak('Tujuh permata lengkap! Penghalang gaib telah lenyap. Seberangi jembatan menuju Pulau Candi.');}},400);}
+
+/* album */
+function openAlbum(){const n=seenCount(),T=ALL_FAUNA.length;
+ openModal(`${X}<div class="body album"><div class="eyebrow">Koleksi</div><h3>Paspor Fauna</h3>
+  <div class="prog"><div class="bar"><i style="width:${n/T*100}%"></i></div><span class="num">${n} / ${T} kartu</span></div>
+  <p style="color:var(--ink-dim);margin:4px 0 0;font-size:13px">Kartu terbuka saat kamu melihat bingkai gambar di dalam bilik.</p>
+  ${ROOMS.map(r=>`<h4 style="--c:${r.color}">${esc(r.name)} <span style="font-family:var(--f-body);font-size:12px;color:var(--ink-dim)">${S.gems[r.id]?'· permata diraih':''}</span></h4><div class="grid">${r.fauna.map(f=>S.seen[f.id]?`<button class="cardf" data-f="${f.id}"><img src="img/${f.id}.jpg" alt=""><div class="t"><b>${esc(f.name)}</b><span>${esc(f.prov)}</span></div></button>`:`<div class="cardf locked"><div class="ph">?</div><div class="t"><b>Belum dikenali</b><span>${esc(f.prov)}</span></div></div>`).join('')}</div>`).join('')}</div>`);
+ $('sheet').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>openFauna(ALL_FAUNA.find(f=>f.id===b.dataset.f)));}
+function openAch(){openModal(`${X}<div class="body"><div class="eyebrow">Capaian</div><h3>Lencana Penjelajah</h3><p style="color:var(--ink-dim);margin:0">${ACH.filter(a=>S.ach[a.id]).length} dari ${ACH.length} lencana terbuka · ${S.points} dari ${MAX_POINTS} poin maksimum</p>
+ <div class="ach">${ACH.map((a,i)=>`<div class="${S.ach[a.id]?'on':''}"><span class="medal">${i+1}</span><p style="margin:0"><b>${esc(a.t)}</b><span>${esc(a.d)}</span></p></div>`).join('')}</div></div>`);}
+function openHelp(){openModal(`${X}<div class="body help"><div class="eyebrow">Panduan</div><h3>Cara Bermain</h3>
+ <ol><li>Masuki tujuh bilik di sekeliling danau. Setiap bilik bergaya rumah adat dan memajang potongan gambar dari film.</li><li>Dekati atau klik bingkai untuk mengenali fauna (+5 poin per kartu baru).</li><li>Jawab kuis di altar tengah bilik. Benar minimal 75% untuk meraih <b>Permata</b> (+20 poin per soal, +50 per permata).</li><li>Kumpulkan tujuh permata, seberangi jembatan, dan buka <b>Harta Karun</b> di Pulau Candi.</li></ol>
+ <dl><dt>W A S D / panah</dt><dd>Berjalan (Shift untuk berlari)</dd><dt>Seret mouse / layar</dt><dd>Melihat sekeliling</dd><dt>E · Enter · klik</dt><dd>Berinteraksi dengan objek</dd><dt>M</dt><dd>Denah dan teleport</dd><dt>P</dt><dd>Paspor Fauna</dd><dt>T</dt><dd>Bicara dengan Kak Rangkong</dd><dt>K</dt><dd>Papan skor kelas</dd><dt>N</dt><dd>Ganti waktu: siang, senja, malam</dd><dt>1–4</dt><dd>Memilih jawaban kuis</dd></dl></div>`);}
+
+/* map */
+const MAP_R=86;
+function drawMap(cv,big){const g=cv.getContext('2d'),W=cv.width,H=cv.height,s=W/(MAP_R*2),cx=W/2,cy=H/2;const P=(x,z)=>[cx+x*s,cy+z*s];
+ g.clearRect(0,0,W,H);g.fillStyle='#1f3a26';g.beginPath();g.arc(cx,cy,W/2,0,TAU);g.fill();
+ g.fillStyle='#2a4d31';g.beginPath();g.arc(cx,cy,(70)*s,0,TAU);g.fill();
+ g.strokeStyle='#c9b27e';g.lineWidth=3*s;g.beginPath();g.arc(cx,cy,PATH_R*s,0,TAU);g.stroke();
+ g.fillStyle='#2f8f9a';g.beginPath();g.arc(cx,cy,(LAKE_R+1)*s,0,TAU);g.fill();
+ g.fillStyle=isUnlocked()?'#e9b949':'#bfb39a';g.beginPath();g.arc(cx,cy,ISLAND_R*s,0,TAU);g.fill();
+ g.fillStyle='#8a6a44';g.fillRect(cx-1.6*s,cy+ISLAND_R*s,3.2*s,(LAKE_R+3.5-ISLAND_R)*s);g.fillRect(cx-1.7*s,cy+(LAKE_R+3)*s,3.4*s,(36)*s);
+ g.fillStyle='#b9a57a';g.beginPath();g.arc(...P(0,56),11*s,0,TAU);g.fill();
+ ROOMS.forEach(r=>{g.save();const[x,y]=P(r.cx,r.cz);g.translate(x,y);g.rotate(-r.a);g.fillStyle=r.color;g.globalAlpha=S.visited[r.id]?1:0.6;g.fillRect(-RW*s,-RD*s,2*RW*s,2*RD*s);g.globalAlpha=1;
+  if(S.gems[r.id]){g.fillStyle='#fff';g.save();g.rotate(Math.PI/4);g.fillRect(-3*s,-3*s,6*s,6*s);g.restore();}g.restore();
+  if(big){g.font=`700 ${Math.round(W/38)}px "Plus Jakarta Sans", sans-serif`;g.textAlign='center';g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=4;const[lx,ly]=P(r.cx*1.32,r.cz*1.32);g.strokeText(r.short,lx,ly+4);g.fillText(r.short,lx,ly+4);}});
+ if(big){g.font=`700 ${Math.round(W/42)}px "Plus Jakarta Sans", sans-serif`;g.textAlign='center';g.fillStyle='#ffe9a8';const lbl=(t,x,z)=>{const[a,b]=P(x,z);g.strokeText(t,a,b);g.fillText(t,a,b);};lbl('Pulau Candi',0,-9);lbl('Gapura',0,70);g.fillStyle='#ffcf57';const[nx,ny]=P(4.6,46.5);g.beginPath();g.arc(nx,ny,5,0,TAU);g.fill();}
+ const[px,py]=P(player.x,player.z);g.save();g.translate(px,py);g.rotate(-player.yaw);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(0,-11);g.lineTo(7,8);g.lineTo(0,4);g.lineTo(-7,8);g.closePath();g.stroke();g.fill();g.restore();}
+function openMap(){openModal(`${X}<div class="body"><div class="eyebrow">Denah Rimba Nusantara</div><h3>Klik titik mana saja untuk teleport</h3><canvas id="bigmap" width="1000" height="1000"></canvas>
+ <div class="legend">${ROOMS.map(r=>`<span><i style="background:${r.color}"></i>${esc(r.short)}${S.gems[r.id]?' ◆':''}</span>`).join('')}<span><i style="background:#ffcf57;border-radius:50%"></i>Kak Rangkong</span></div></div>`);
+ const cv=$('bigmap');drawMap(cv,true);
+ cv.onclick=e=>{const b=cv.getBoundingClientRect();const x=((e.clientX-b.left)/b.width*2-1)*MAP_R,z=((e.clientY-b.top)/b.height*2-1)*MAP_R;
+  for(const r of ROOMS){const[lx,lz]=toLocal(r,x,z);if(Math.abs(lx)<RW+2&&lz>-RD-2&&lz<RD+4){const[ix,iz]=toWorld(r,0,RD-2.2);teleport(ix,iz,r.a);closeModal();toast(`Teleport ke <b>${esc(r.name)}</b>`,2200);return;}}
+  if(Math.hypot(x,z)<ISLAND_R+1&&isUnlocked()){teleport(0,5.6,0);closeModal();return;}
+  if(allowed(x,z)){const[cx2,cz2]=collide(x,z);teleport(cx2,cz2);closeModal();toast('Teleport berhasil',1600);}else toast('Titik itu ada di air atau di luar rimba. Pilih daratan.',2400);};}
+$('miniWrap').onclick=openMap;
+
+/* chat with Kak Rangkong */
+const ALIAS={aceh:['aceh','nad'],sumut:['sumatera utara','sumatra utara','sumut','medan'],sumbar:['sumatera barat','sumatra barat','sumbar','padang'],kepri:['kepulauan riau','kepri','batam'],riau:['riau','pekanbaru'],jambi:['jambi'],sumsel:['sumatera selatan','sumatra selatan','sumsel','palembang'],babel:['bangka belitung','bangka','belitung','babel'],bengkulu:['bengkulu'],lampung:['lampung'],banten:['banten'],dki:['dki jakarta','jakarta','dki'],jabar:['jawa barat','jabar','bandung','bogor'],jateng:['jawa tengah','jateng','semarang'],diy:['yogyakarta','jogja','yogya','diy'],jatim:['jawa timur','jatim','surabaya'],bali:['bali'],ntb:['nusa tenggara barat','ntb','lombok'],ntt:['nusa tenggara timur','ntt','flores'],kalbar:['kalimantan barat','kalbar','pontianak'],kalteng:['kalimantan tengah','kalteng'],kalsel:['kalimantan selatan','kalsel','banjarmasin'],kaltim:['kalimantan timur','kaltim','samarinda'],sulsel:['sulawesi selatan','sulsel','makassar'],sulbar:['sulawesi barat','sulbar'],sultra:['sulawesi tenggara','sultra','kendari'],sulteng:['sulawesi tengah','sulteng','palu'],gorontalo:['gorontalo'],sulut:['sulawesi utara','sulut','manado'],malut:['maluku utara','malut','ternate'],maluku:['maluku','ambon'],pabar:['papua barat','pabar','raja ampat'],papua:['papua','jayapura']};
+const EXTRA={'siluk-merah':['arwana'],babel:['tarsius bangka'],sulut:['tarsius'],kalbar:['rangkong gading','enggang'],sulsel:['julang'],komodo:['komodo'],jabar:['macan'],jambi:['harimau'],lampung:['gajah'],banten:['badak'],kaltim:['pesut'],papua:['12 kawat','dua belas kawat'],pabar:['cendrawasih merah'],sumsel:['belida','pempek']};
+const TERMS=[];ALL_FAUNA.forEach(f=>{TERMS.push({t:f.name.toLowerCase(),f});(EXTRA[f.id]||[]).forEach(t=>TERMS.push({t,f}));if(f.id!=='komodo'&&f.id!=='siluk-merah'&&f.id!=='elang-jawa')(ALIAS[f.id]||[]).forEach(t=>TERMS.push({t,f,prov:true}));});
+TERMS.sort((a,b)=>b.t.length-a.t.length);
+ROOMS.forEach(r=>{r.keys=[r.short.toLowerCase(),r.id,r.name.toLowerCase()];});
+function botAnswer(q){const s=' '+q.toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ')+' ';const has=(...w)=>w.some(x=>s.includes(x));
+ if(has(' halo ',' hai ',' hi ',' assalam',' pagi ',' siang ',' sore ',' malam ')&&s.trim().split(' ').length<=3)return{t:`Halo, ${S.name||'Penjelajah'}! Aku Kak Rangkong, pemandu rimba ini. Tanyakan fauna sebuah provinsi, misalnya “fauna Jawa Barat?”, atau tanya misimu.`};
+ if(has('wallace','weber','garis','asiatis','australis','peralihan','persebaran'))return{t:BOARDS[1].text+' '+BOARDS[2].text};
+ if(has('poin','skor','nilai'))return{t:`Poinmu ${S.points} dari ${MAX_POINTS}. Kamu sudah mengenali ${seenCount()} dari ${ALL_FAUNA.length} fauna dan meraih ${gemCount()} permata.`};
+ if(has('nasional','pesona','langka'))return{t:'Tiga fauna identitas nasional: Komodo (Satwa Nasional), Siluk Merah (Satwa Pesona), dan Elang Jawa (Satwa Langka). Semuanya ada di Bilik Satwa Nasional.',act:roomAct(ROOMS[0])};
+ const hit=TERMS.find(x=>s.includes(' '+x.t+' ')||s.includes(' '+x.t));
+ if(hit){const f=hit.f;if(f.id==='komodo'||f.id==='ntt')return{t:'Komodo adalah Satwa Nasional sekaligus fauna identitas Nusa Tenggara Timur. Biawak terbesar di dunia ini hidup di Pulau Komodo, Rinca, dan Flores.',act:roomAct(ROOMS[3])};
+  return{t:f.ri===0?`${f.name} adalah ${f.prov} Indonesia. ${f.fact}`:`Fauna identitas ${f.prov} adalah ${f.name}. ${f.fact} Bingkainya ada di ${f.room.name}.`,act:roomAct(f.room)};}
+ const room=ROOMS.find(r=>r.keys.some(k=>s.includes(k)));if(room)return{t:`${room.name} bergaya ${room.arch}, ada di sisi ${room.dir} danau. Isinya: ${room.fauna.map(f=>f.name).join(', ')}.`,act:roomAct(room)};
+ if(has('harta','karun','treasure','permata','kunci','candi','pulau'))return{t:isUnlocked()?(S.opened?'Harta karun sudah kamu buka. Piagammu tersimpan di peti di Pulau Candi.':'Tujuh permata sudah lengkap! Seberangi jembatan di selatan danau dan buka peti di depan stupa.'):`Harta karun ada di Pulau Candi, di tengah danau. Penghalang gaib baru lenyap jika kamu punya tujuh permata. Saat ini kamu punya ${gemCount()}. Permata didapat dari kuis di altar setiap bilik.`};
+ if(has('misi','tugas','cara','main','bingung','apa yang','mulai'))return{t:`Misimu: ${missionText()} Masuk ke bilik, lihat bingkai-bingkai gambar, lalu jawab kuis di altar tengah.`,act:nextRoom()?roomAct(nextRoom()):null};
+ if(has('terima kasih','makasih','thanks'))return{t:'Sama-sama! Selamat menjelajah, jaga satwa Nusantara, ya.'};
+ return{t:'Aku belum paham pertanyaan itu. Coba tanyakan nama provinsi (“fauna Bengkulu?”), nama satwa (“anoa”), “misi”, atau “garis Wallace”.'};}
+function roomAct(r){return{label:'Teleport ke '+r.short,fn:()=>{const[ix,iz]=toWorld(r,0,RD+2.5);teleport(ix,iz,r.a);closeChat();toast(`Kamu di depan <b>${esc(r.name)}</b>`,2200);}};}
+function pushMsg(text,who,act){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;if(act){const b=document.createElement('button');b.className='btn small act';b.textContent=act.label;b.onclick=act.fn;d.appendChild(document.createElement('br'));d.appendChild(b);}$('log').appendChild(d);$('log').scrollTop=1e6;}
+function ask(q){if(!q.trim())return;pushMsg(q,'me');const a=botAnswer(q);setTimeout(()=>{pushMsg(a.t,'bot',a.act);speak(a.t);},250);}
+let chatGreeted=false;
+function openChat(){if(modalOpen)closeModal();$('chat').hidden=false;for(const k in keys)keys[k]=false;
+ if(!chatGreeted){chatGreeted=true;pushMsg(`Halo ${S.name||'Penjelajah'}! Aku Kak Rangkong. ${missionText()} Tanyakan apa saja tentang fauna identitas provinsi.`,'bot');}
+ if(!S.ach.pemandu){S.ach.pemandu=1;save();achToast('pemandu');}
+ setTimeout(()=>{if(!isTouch)$('chatIn').focus();},60);}
+function closeChat(){$('chat').hidden=true;canvas.focus();}
+$('chatClose').onclick=closeChat;
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();const v=$('chatIn').value;$('chatIn').value='';ask(v);});
+['Apa misiku?','Fauna Jawa Barat?','Di mana harta karun?','Apa itu garis Wallace?','Satwa nasional?','Poinku berapa?'].forEach(t=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>ask(t);$('quick').appendChild(b);});
+
+/* achievements */
+function achToast(id){const a=ACH.find(x=>x.id===id);if(!a)return;A.sfx('ach');toast(`Lencana terbuka: <b>${esc(a.t)}</b>`,3200);}
+function checkAch(){const give=id=>{if(!S.ach[id]){S.ach[id]=1;achToast(id);}};
+ if(playing)give('mulai');if(Object.keys(S.boards).length>=3)give('peta');const v=Object.keys(S.visited).length;if(v>=1)give('bilik1');if(v>=7)give('bilik7');
+ const sc=seenCount();if(sc>=12)give('fauna12');if(sc>=ALL_FAUNA.length)give('fauna36');if(S.ach.sempurnaPending){delete S.ach.sempurnaPending;give('sempurna');}
+ const gc=gemCount();if(gc>=1)give('permata1');if(gc>=7)give('permata7');if(S.time===2&&playing)give('malam');if(S.opened)give('harta');save();}
+
+/* treasure */
+function openTreasure(){if(cinematic)return;cinematic={t:0,from:camera.position.clone(),fromQ:camera.quaternion.clone()};$('prompt').hidden=true;
+ const to=new THREE.Vector3(0,2.6,7.4);const look=new THREE.Object3D();look.position.copy(to);look.lookAt(0,1.1,3.4);cinematic.to=to;cinematic.toQ=look.quaternion.clone();A.sfx('open');speak('Harta karun Rimba Nusantara terbuka!');}
+function runCinematic(dt){const C=cinematic;C.t+=dt;const k=Math.min(1,C.t/1.6),e=k*k*(3-2*k);camera.position.lerpVectors(C.from,C.to,e);camera.quaternion.copy(C.fromQ).slerp(C.toQ,e);
+ const lid=chest.userData.lid;const o=Math.max(0,Math.min(1,(C.t-1.4)/1.2));lid.rotation.x=-o*1.9;chestLight.intensity=o*3;islandGlow.material.opacity=o;
+ if(C.t>1.8){crown.visible=true;const u=Math.min(1,(C.t-1.8)/1.6);crown.position.y=0.5+u*1.9;crown.rotation.y+=dt*1.5;}
+ if(!C.burst&&C.t>1.9){C.burst=true;burst(new THREE.Vector3(0,1.4,3.4),220);}
+ if(C.t>4.2){cinematic=null;S.opened=true;save();checkAch();renderHud();teleport(0,6.8,0);openCert();}}
+function rank(){const p=S.points/MAX_POINTS;return p>=0.82?'Penjelajah Emas':p>=0.6?'Penjelajah Perak':'Penjelajah Perunggu';}
+function openCert(){const d=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+ openModal(`${X}<div class="body"><div class="cert"><div class="eyebrow">Piagam Penghargaan</div><h3>Penjelajah Rimba Nusantara</h3><p style="margin:6px 0 0;color:var(--ink-dim)">diberikan kepada</p>
+  <div class="name">${esc(S.name||'Penjelajah')}</div><div class="rank">${rank()}</div>
+  <p style="max-width:52ch;margin:0 auto 16px;line-height:1.6">Telah menjelajahi tujuh bilik, mengenali fauna identitas provinsi di Indonesia, dan membuka Mahkota Rimba di Pulau Candi.</p>
+  <div class="stats"><div><b class="num">${S.points}</b><span>Poin</span></div><div><b class="num">${gemCount()}/7</b><span>Permata</span></div><div><b class="num">${seenCount()}/${ALL_FAUNA.length}</b><span>Fauna</span></div></div>
+  <div style="font-size:12px;color:var(--ink-dim)">${d} · Rimba Nusantara</div></div>
+  <div class="row" style="justify-content:center;margin-top:16px"><button class="btn small" id="again">Main lagi dari awal</button><button class="btn primary small" id="keep">Lanjut menjelajah</button></div><div id="cfm"></div></div>`,'#e9b949');
+ $('keep').onclick=closeModal;$('again').onclick=()=>{$('cfm').innerHTML='<div class="confirm">Semua poin, permata, dan kartu akan dihapus. <div class="row" style="margin-top:10px"><button class="btn small" id="cNo">Batal</button><button class="btn small primary" id="cYes">Ya, mulai baru</button></div></div>';$('cNo').onclick=()=>{$('cfm').innerHTML='';};$('cYes').onclick=resetAll;};}
+function resetAll(){const nm=S.name,kl=S.kelas;S=fresh();S.name=nm;S.kelas=kl;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}LB.lastSent='';pushScore(true);setTimeout(()=>location.reload(),900);}
+
+/* particles */
+const bursts=[];
+function burst(at,n){const p=new Float32Array(n*3),v=[];const cols=new Float32Array(n*3);const c=new THREE.Color();
+ for(let i=0;i<n;i++){p.set([at.x,at.y,at.z],i*3);v.push([rand(-3,3),rand(3,8),rand(-3,3)]);c.set(ROOMS[i%7].color);cols.set([c.r,c.g,c.b],i*3);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ const m=new THREE.PointsMaterial({size:.35,map:glowTex,vertexColors:true,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});const pts=new THREE.Points(g,m);scene.add(pts);bursts.push({pts,v,t:0});}
+
+/* tools */
+$('tMap').onclick=openMap;$('tAlbum').onclick=openAlbum;$('tAch').onclick=openAch;$('tHelp').onclick=openHelp;$('tChat').onclick=()=>$('chat').hidden?openChat():closeChat();
+$('tTime').onclick=cycleTime;
+function cycleTime(){S.time=(S.time+1)%3;save();renderHud();toast('Waktu berganti: <b>'+PRESETS[S.time].name+'</b>',1800);checkAch();}
+$('tSound').onclick=()=>{S.sound=!S.sound;save();A.init();A.setOn(S.sound);renderHud();};
+$('tVoice').onclick=()=>{S.voice=!S.voice;save();if(!S.voice)try{speechSynthesis.cancel();}catch(e){}renderHud();toast(S.voice?'Narasi suara aktif':'Narasi suara dimatikan',1600);};
+
+/* =====================================================================
+   11. START
+   ===================================================================== */
+function readyStart(){const b=$('go');b.disabled=false;b.textContent=S.name?'Lanjutkan petualangan':'Masuk ke Rimba';
+ if(S.kelas)$('kelasIn').value=S.kelas;
+ if(S.name){$('nameIn').value=S.name;$('reset').hidden=false;$('resume').hidden=false;$('resume').innerHTML=`<div class="card" style="padding:12px 14px;font-size:13.5px;line-height:1.5">Progres tersimpan: <b>${S.points} poin</b>, ${gemCount()}/7 permata, ${seenCount()}/${ALL_FAUNA.length} fauna.</div>`;}}
+$('reset').onclick=()=>{S=fresh();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}$('kelasIn').value='';$('reset').hidden=true;$('resume').hidden=true;$('nameIn').value='';$('go').textContent='Masuk ke Rimba';};
+$('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('go').disabled)$('go').click();});
+$('go').onclick=()=>{S.name=($('nameIn').value.trim()||'Penjelajah').slice(0,28);S.kelas=$('kelasIn').value.trim().toUpperCase().slice(0,16);playingStarted=true;save();A.init();A.setOn(S.sound);
+ $('start').hidden=true;$('hud').hidden=false;renderHud();
+ cinematic={t:0,from:camera.position.clone(),fromQ:camera.quaternion.clone(),intro:true};const look=new THREE.Object3D();look.position.set(0,1.82,62);look.rotation.set(-0.05,0,0,'YXZ');cinematic.to=look.position.clone();cinematic.toQ=look.quaternion.clone();};
+function runIntro(dt){const C=cinematic;C.t+=dt;const k=Math.min(1,C.t/2.6),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;camera.position.lerpVectors(C.from,C.to,e);camera.quaternion.copy(C.fromQ).slerp(C.toQ,e);
+ if(k>=1){cinematic=null;playing=true;teleport(0,62,0);checkAch();canvas.focus();
+  banner('Selamat datang, '+(S.name||'Penjelajah'),'Rimba Nusantara','Kak Rangkong menunggumu di balik gapura.');speak('Selamat datang di Rimba Nusantara, '+S.name+'. Temui Kak Rangkong di balik gapura.');
+  setTimeout(()=>toast('Tip: seret layar untuk melihat, <b>W A S D</b> untuk berjalan, dan <b>E</b> atau klik untuk berinteraksi.',5200),1800);}}
+
+/* =====================================================================
+   12. LOOP
+   ===================================================================== */
+let frameN=0;const mini=$('mini');
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),0.05),t=clock.elapsedTime;frameN++;
+ applySky(dt,frameN<3);waterU.uTime.value=t;grassU.uTime.value=t;barrierU.uTime.value=t;
+ // barrier & pedestals
+ const un=isUnlocked();barrierU.uOp.value+=((un?0:1)-barrierU.uOp.value)*Math.min(1,dt*1.2);barrier.visible=barrierU.uOp.value>0.01;
+ pedGems.forEach((p,i)=>{const on=!!S.gems[p.room.id];p.gm.material.emissiveIntensity+=((on?1.2:0)-p.gm.material.emissiveIntensity)*dt*2;p.gm.material.color.set(on?p.room.color:'#333');p.gl.material.opacity=on?0.75+Math.sin(t*2+i)*0.2:0;p.gm.rotation.y=t*(on?1.5:0.2);p.gm.position.y=1.65+(on?Math.sin(t*1.6+i)*0.12:0);
+  beams[i].material.opacity=un?(0.22+Math.sin(t*1.5+i)*0.08)*(S.opened?0.6:1):0;});
+ ROOMS.forEach(r=>{r.badge.rotation.y=t;r.badge.material.emissiveIntensity=S.gems[r.id]?1:0.1;});
+ altars.forEach((a,i)=>{a.gem.rotation.y=t*1.2;a.gem.position.y=2.05+Math.sin(t*1.8+i)*0.12;a.glow.material.opacity=0.55+Math.sin(t*2.5+i)*0.2;});
+ if(!S.opened){chest.userData.lid.rotation.x=un?-Math.abs(Math.sin(t*3))*0.05:0;}
+ else if(!cinematic){chest.userData.lid.rotation.x=-1.9;crown.visible=true;crown.position.y=2.4+Math.sin(t)*0.1;crown.rotation.y=t*0.8;chestLight.intensity=2.2;islandGlow.material.opacity=.7;}
+ // ambient life
+ clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>300)c.position.x=-300;});
+ smokes.forEach(s=>{s.userData.t=(s.userData.t+dt*0.03)%1;const u=s.userData.t;s.position.set(-60+u*30,101+u*60,-215+u*10);const sc=12+u*40;s.scale.set(sc,sc,1);s.material.opacity=0.55*(1-u);});
+ const fp=fireflies.geometry.attributes.position,sd=fireflies.userData.seed;if(nightAmt>0.2){for(let i=0;i<sd.length;i++){const s=sd[i];fp.setXYZ(i,s[0]+Math.sin(t*.5+s[3])*1.5,s[1]+Math.sin(t*.9+s[3]*2)*.4,s[2]+Math.cos(t*.4+s[3])*1.5);}fp.needsUpdate=true;}
+ butterflies.forEach(b=>{const u=b.userData;const a=t*u.sp+u.ph;b.position.set(u.home[0]+Math.sin(a)*2.2,0.9+Math.sin(a*2.3)*0.4,u.home[1]+Math.cos(a*1.3)*2.2);b.rotation.y=-a;const fl=Math.sin(t*18+u.ph)*1.1;u.l.rotation.z=fl;u.r.rotation.z=-fl;b.visible=nightAmt<0.7;});
+ birds.forEach(b=>{const u=b.userData;const a=t*u.sp+u.ph;b.position.set(Math.cos(a)*u.rad,u.h+Math.sin(a*3)*1.5,Math.sin(a)*u.rad);b.rotation.y=-a-(u.sp>0?0:Math.PI);const fl=Math.sin(t*6+u.ph)*0.6;u.l.rotation.z=fl;u.r.rotation.z=-fl;});
+ flames.forEach((f,i)=>{const s=1.2+Math.sin(t*9+i*1.7)*0.15+nightAmt*0.6;f.scale.set(s,s*1.25,1);});
+ if(npc){npc.position.y=2.6+Math.sin(t*1.6)*0.25;const dx=camera.position.x-npc.position.x,dz=camera.position.z-npc.position.z;npc.rotation.y=Math.atan2(dx,dz);npc.userData.wings.forEach((w,k)=>{w.rotation.z=(k?-1:1)*Math.sin(t*5)*0.45;});npc.userData.bubble.material.opacity=S.ach.pemandu?0.0:1;}
+ for(let i=bursts.length-1;i>=0;i--){const B=bursts[i];B.t+=dt;const p=B.pts.geometry.attributes.position;for(let j=0;j<B.v.length;j++){B.v[j][1]-=6*dt;p.setXYZ(j,p.getX(j)+B.v[j][0]*dt,p.getY(j)+B.v[j][1]*dt,p.getZ(j)+B.v[j][2]*dt);}p.needsUpdate=true;B.pts.material.opacity=Math.max(0,1-B.t/2.5);if(B.t>2.5){scene.remove(B.pts);bursts.splice(i,1);}}
+ // camera
+ if(cinematic){if(cinematic.intro)runIntro(dt);else runCinematic(dt);}
+ else if(playing){if(!modalOpen&&$('chat').hidden)stepPlayer(dt);else{camera.position.set(player.x,eyeY(player.x,player.z),player.z);camera.rotation.set(player.pitch,player.yaw,0);}
+  updateFocus();
+  const r=roomAt(player.x,player.z);if(r!==currentRoom){currentRoom=r;if(r){const first=!S.visited[r.id];S.visited[r.id]=1;save();checkAch();banner(r.arch+' · '+r.fauna.length+' fauna',r.name,S.gems[r.id]?'Permata bilik ini sudah kamu miliki.':'Kenali setiap bingkai, lalu jawab kuis di altar tengah.');if(first)speak(r.name+'. '+r.intro);}}
+  if(frameN%2===0){const[tx,tz]=missionTarget();const ang=Math.atan2(tx-player.x,-(tz-player.z));const rel=ang+player.yaw;$('compass').firstElementChild.style.transform=`rotate(${rel}rad)`;}
+  if(frameN%4===0&&!$('miniWrap').hidden)drawMap(mini,false);}
+ else{const a=t*0.05;camera.position.set(Math.sin(a)*35,13,Math.cos(a)*35);camera.lookAt(0,2.5,0);}
+ renderer.render(scene,camera);}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+
+/* =====================================================================
+   13. PAPAN SKOR KELAS (db bersama: skor/<id pemain>)
+   ===================================================================== */
+const LB={db:null,user:null,dl:null,uid:null,owner:false,rows:[],ready:false,readOnly:false,writing:false,pending:false,lastSent:'',timer:0,filter:null,note:'',names:{},delAsk:null};
+let scoresOpen=false,playingStarted=false;
+const computePoints=()=>Object.keys(S.seen).length*5+Object.keys(S.correct).length*20+gemCount()*50;
+function scoreBody(){const pick=o=>Object.fromEntries(Object.keys(o||{}).filter(k=>k!=='sempurnaPending').map(k=>[k,1]));
+ return{nama:(S.name||'Penjelajah').slice(0,28),kelas:(S.kelas||'').slice(0,16),points:S.points,gems:gemCount(),gemIds:ROOMS.filter(r=>S.gems[r.id]).map(r=>r.id),fauna:seenCount(),opened:!!S.opened,
+  prog:{seen:pick(S.seen),gems:pick(S.gems),correct:pick(S.correct),visited:pick(S.visited),ach:pick(S.ach),boards:pick(S.boards)}};}
+function pushScore(now){if(!LB.db||!LB.uid||LB.readOnly||!(playingStarted||playing))return;clearTimeout(LB.timer);LB.timer=setTimeout(writeScore,now?0:1200);}
+async function writeScore(){if(LB.writing){LB.pending=true;return;}const body=scoreBody();const sig=JSON.stringify(body);if(sig===LB.lastSent)return;
+ LB.writing=true;try{await LB.db.doc('skor/'+LB.uid).set(Object.assign(body,{updatedAt:new Date().toISOString()}));LB.lastSent=sig;}
+ catch(e){const c=e&&e.code;if(c==='invalid_argument'||c==='not_granted'||c==='revoked'){LB.readOnly=true;LB.note='Aksesmu ke halaman ini hanya untuk melihat, jadi skormu tidak masuk papan. Minta dosen memberi akses Contributor.';toast('Skormu belum tersimpan ke papan kelas: aksesmu hanya melihat.',4200);}
+  else if(c==='quota_exceeded'){toast('Papan skor penuh. Beri tahu dosen.',4000);}
+  else if(c==='unavailable'&&(LB.retries=(LB.retries||0)+1)<=3){setTimeout(()=>pushScore(true),1500+Math.random()*1500);}}
+ finally{LB.writing=false;if(LB.pending){LB.pending=false;pushScore(true);}}}
+function mergeRemote(d){if(!d||!d.prog)return;const before=new Set(Object.keys(S.seen));
+ ['seen','gems','correct','visited','ach','boards'].forEach(k=>{const src=d.prog[k];if(src&&typeof src==='object')Object.keys(src).forEach(id=>{S[k][id]=1;});});
+ if(d.opened)S.opened=true;if(!S.name&&typeof d.nama==='string')S.name=d.nama;if(!S.kelas&&typeof d.kelas==='string')S.kelas=d.kelas;
+ S.points=computePoints();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+ ALL_FAUNA.forEach(f=>{if(S.seen[f.id]&&!before.has(f.id)&&frames.length)updatePlate(f);});
+ if(!$('start').hidden&&!$('go').disabled)readyStart();else renderHud();}
+const num=(v,max)=>{v=Number(v);return Number.isFinite(v)?Math.max(0,Math.min(max,Math.round(v))):0;};
+function cleanRow(d){const x=d.data()||{};return{id:d.id,nama:String(x.nama||'Penjelajah').slice(0,28),kelas:String(x.kelas||'').slice(0,16),points:num(x.points,MAX_POINTS),gems:num(x.gems,7),
+ gemIds:Array.isArray(x.gemIds)?x.gemIds.filter(g=>typeof g==='string'):[],fauna:num(x.fauna,ALL_FAUNA.length),opened:!!x.opened,updatedAt:typeof x.updatedAt==='string'?x.updatedAt:''};}
+function sortRows(rows){return rows.slice().sort((a,b)=>b.points-a.points||b.gems-a.gems||(a.updatedAt>b.updatedAt?1:-1));}
+function classList(){return[...new Set(LB.rows.map(r=>r.kelas).filter(Boolean))].sort();}
+function myRank(){if(!LB.uid)return null;const pool=sortRows(LB.rows.filter(r=>!S.kelas||r.kelas===S.kelas));const i=pool.findIndex(r=>r.id===LB.uid);return i<0?null:{rank:i+1,of:pool.length};}
+function renderRank(){const el=$('rankLine');if(!el)return;const r=LB.ready?myRank():null;if(!r){el.hidden=true;return;}el.hidden=false;
+ el.innerHTML=`Peringkat <b class="num">#${r.rank}</b> dari ${r.of} di papan ${S.kelas?'kelas '+esc(S.kelas):'skor'}`;}
+function ago(iso){const t=Date.parse(iso);if(!t)return'';const m=Math.round((Date.now()-t)/60000);if(m<1)return'baru saja';if(m<60)return m+' menit lalu';const h=Math.round(m/60);if(h<24)return h+' jam lalu';return Math.round(h/24)+' hari lalu';}
+let prevRank=null;
+function onBoard(){renderRank();const r=myRank();if(r&&prevRank&&r.rank<prevRank&&playing)toast(`Kamu naik ke <b>peringkat #${r.rank}</b> di papan ${S.kelas?'kelas '+esc(S.kelas):'skor'}!`,3000);prevRank=r?r.rank:null;
+ const ls=$('lbStart');if(ls){const n=LB.rows.length;ls.hidden=!n;ls.textContent=n?`Papan skor bersama: ${n} penjelajah sudah tercatat.`:'';}
+ if(scoresOpen)renderScores();}
+async function resolveNames(ids){if(!LB.user||!ids.length)return;try{const ps=await LB.user.profiles(ids);let ch=false;ids.forEach(id=>{const n=(ps[id]&&ps[id].name)||'';if(LB.names[id]!==n){LB.names[id]=n;ch=true;}});if(ch&&scoresOpen)renderScores(true);}catch(e){}}
+function openScores(){openModal(`${X}<div class="body"><div class="eyebrow">Papan Skor Kelas</div><h3>Klasemen Penjelajah</h3><div id="lbBody"></div></div>`);scoresOpen=true;renderScores();}
+function renderScores(skipNames){const box=$('lbBody');if(!box)return;
+ if(!LB.db){box.innerHTML=`<div class="lbnote">${LB.note?esc(LB.note):'Papan skor bersama belum terhubung. Buka halaman ini dari claude.ai dalam keadaan masuk akun agar skor seluruh kelas bisa dilihat.'}</div><p style="color:var(--ink-dim);margin:0">Skormu sendiri saat ini: <b>${S.points}</b> poin, ${gemCount()}/7 permata.</p>`;return;}
+ if(!LB.ready){box.innerHTML='<div class="lbempty">Memuat papan skor…</div>';return;}
+ const kls=classList();if(LB.filter===null)LB.filter=S.kelas&&kls.includes(S.kelas)?S.kelas:'';if(LB.filter&&!kls.includes(LB.filter))LB.filter='';
+ const rows=sortRows(LB.rows.filter(r=>!LB.filter||r.kelas===LB.filter));const canDl=LB.owner&&LB.dl;
+ const note=LB.readOnly?`<div class="lbnote">${esc(LB.note)}</div>`:(!LB.uid?'<div class="lbnote">Kamu bisa melihat papan, tetapi skormu tidak tercatat karena akunmu tidak dikenali di halaman ini.</div>':'');
+ box.innerHTML=`${note}<div class="lbhead"><div class="filters" role="group" aria-label="Pilih kelas"><button data-k="" aria-pressed="${!LB.filter}">Semua kelas</button>${kls.map(k=>`<button data-k="${esc(k)}" aria-pressed="${LB.filter===k}">${esc(k)}</button>`).join('')}</div>
+  <div class="row"><span class="chip num">${rows.length} penjelajah · ${rows.filter(r=>r.opened).length} membuka harta</span>${canDl?'<button class="btn small" id="lbCsv">Unduh CSV</button>':''}</div></div>
+  ${rows.length?`<div class="lb">${rows.map((r,i)=>{const me=r.id===LB.uid;const acct=LB.names[r.id];return`<div class="lbrow${me?' me':''}"><div class="rk${i<3?' m'+(i+1):''} num">${i+1}</div>
+   <div class="nm"><b>${esc(r.nama)}${me?' (kamu)':''}${r.opened?'<span class="crownchip">HARTA</span>':''}</b><span>${[r.kelas?'Kelas '+esc(r.kelas):'Tanpa kelas',acct&&acct!==r.nama?'akun '+esc(acct):'',r.fauna+'/'+ALL_FAUNA.length+' fauna',ago(r.updatedAt)].filter(Boolean).join(' · ')}</span>
+   <div class="gems">${ROOMS.map(rm=>`<i class="gem${r.gemIds.includes(rm.id)?' on':''}" style="--c:${rm.color}"></i>`).join('')}</div></div>
+   <div class="sc"><b class="num">${r.points}</b><span>poin</span>${LB.owner&&!me?(LB.delAsk===r.id?`<div><button class="del" data-del="${esc(r.id)}">Yakin hapus?</button></div>`:`<div><button class="del" data-ask="${esc(r.id)}">Hapus</button></div>`):''}</div></div>`;}).join('')}</div>`
+  :`<div class="lbempty">Belum ada penjelajah${LB.filter?' di kelas '+esc(LB.filter):''}. Skor muncul di sini begitu pemain mulai menjelajah.</div>`}
+  ${LB.owner?'<p style="font-size:12px;color:var(--ink-dim);margin:14px 0 0;line-height:1.5">Sebagai pemilik, kamu bisa menghapus entri uji coba. Pemain lain hanya bisa menulis skornya sendiri.</p>':''}`;
+ box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{LB.filter=b.dataset.k;renderScores(true);});
+ box.querySelectorAll('[data-ask]').forEach(b=>b.onclick=()=>{LB.delAsk=b.dataset.ask;renderScores(true);});
+ box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const id=b.dataset.del;LB.delAsk=null;try{await LB.db.doc('skor/'+id).delete();toast('Entri dihapus dari papan.',2000);}catch(e){toast('Gagal menghapus entri. Coba lagi.',2500);}});
+ if(canDl)$('lbCsv').onclick=async()=>{const q=v=>'"'+String(v).replace(/"/g,'""')+'"';const lines=[['Peringkat','Nama','Akun','Kelas','Poin','Permata','Fauna','Harta Karun','Terakhir aktif'].map(q).join(',')];
+  rows.forEach((r,i)=>lines.push([i+1,r.nama,LB.names[r.id]||'',r.kelas,r.points,r.gems,r.fauna,r.opened?'Ya':'Belum',r.updatedAt].map(q).join(',')));
+  try{await LB.dl.save({filename:'papan-skor-rimba-nusantara'+(LB.filter?'-'+LB.filter:'')+'.csv',data:'﻿'+lines.join('\n')});}catch(e){if(e&&e.code!=='cancelled')toast('Unduhan tidak tersedia di tampilan ini.',2500);}};
+ if(!skipNames)resolveNames(rows.map(r=>r.id));}
+async function initBoard(){try{if(!window.claude||typeof window.claude.use!=='function')return;
+ const[db,user,dl]=await Promise.all([claude.use('db'),claude.use('user'),claude.use('downloads')]);LB.db=db;LB.user=user;LB.dl=dl;
+ if(user){LB.uid=await user.id();LB.owner=await user.isOwner();const cw=await user.can('data.write');if(cw===false&&!LB.owner){LB.readOnly=true;LB.note='Aksesmu ke halaman ini hanya untuk melihat, jadi skormu tidak masuk papan. Minta dosen memberi akses Contributor.';}}
+ if(!db){if(scoresOpen)renderScores();return;}
+ db.collection('skor').limit(1000).onSnapshot(snap=>{LB.rows=snap.docs.filter(d=>d.exists).map(cleanRow);LB.ready=true;onBoard();},err=>{LB.note='Papan skor terputus. Muat ulang halaman untuk menyambung lagi.';LB.db=null;if(scoresOpen)renderScores();});
+ if(LB.uid){try{const me=await db.doc('skor/'+LB.uid).get();if(me.exists)mergeRemote(me.data());}catch(e){}}
+ pushScore(true);
+ }catch(e){}}
+$('tScore').onclick=openScores;$('rankLine').onclick=openScores;
+
+/* build world after fonts are ready (so canvas labels use the right faces) */
+const fontsReady=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve();
+fontsReady.then(()=>{
+ ROOMS.forEach(buildRoom);buildPlaza();buildVegetation();for(let i=0;i<26;i++)makeButterfly();for(let i=0;i<12;i++)makeBird(i);
+ applySky(0,true);loop();
+});
+initBoard();
+})();
+</script>
+
+</body></html>
